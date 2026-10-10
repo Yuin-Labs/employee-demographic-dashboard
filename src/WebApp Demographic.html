@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Employee Demographic Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2f6f0;--surface:#ffffff;--card:#ffffff;--border:#dde8d8;
+  --accent1:#5BAD3A;--accent2:#F5A623;--accent3:#7DC052;
+  --accent4:#E05A2B;--accent5:#3A8A5B;
+  --text:#2C3E2D;--muted:#7A8C7B;
+  --radius:14px;--font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;min-height:100vh}
+
+/* ── HEADER ── */
+.header{
+  background:linear-gradient(135deg,#fff 0%,#eaf3e4 100%);
+  border-bottom:1px solid var(--border);
+  padding:16px 40px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.header-title{flex:1}
+.header-title h1{
+  font-family:var(--font-head);font-size:20px;font-weight:800;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--accent1),var(--accent5));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.header-title p{color:var(--muted);font-size:12px;margin-top:2px}
+
+/* ── SUB-HEADER ── */
+.sub-header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:8px 40px;display:flex;align-items:center;justify-content:flex-end;gap:8px;
+}
+.btn-refresh{
+  background:var(--accent1);color:#fff;border:none;border-radius:8px;
+  padding:7px 16px;font-family:var(--font-body);font-size:12px;font-weight:500;
+  cursor:pointer;transition:opacity .2s;
+}
+.btn-refresh:hover{opacity:.85}
+.btn-refresh:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── TABS ── */
+.tab-bar{
+  background:var(--surface);border-bottom:2px solid var(--border);
+  padding:0 40px;display:flex;gap:0;
+}
+.tab-btn{
+  background:none;border:none;border-bottom:3px solid transparent;
+  margin-bottom:-2px;
+  padding:13px 22px;font-family:var(--font-body);font-size:13px;font-weight:500;
+  color:var(--muted);cursor:pointer;transition:color .2s,border-color .2s;
+}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent1);border-bottom-color:var(--accent1);font-weight:700}
+
+/* ── FILTER BAR ── */
+.filter-bar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:10px 40px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.filter-label{color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
+.filter-sep{width:1px;height:18px;background:var(--border);margin:0 2px}
+select,input[type=date],input[type=month]{
+  background:var(--card);color:var(--text);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;font-family:var(--font-body);font-size:12px;
+  cursor:pointer;outline:none;transition:border-color .2s;
+}
+select{min-width:130px}
+select:focus,input:focus{border-color:var(--accent1)}
+.period-mode-btn{
+  background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  padding:5px 10px;font-size:11px;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.period-mode-btn.active{background:var(--accent1);color:#fff;border-color:var(--accent1)}
+.period-inputs{display:flex;align-items:center;gap:6px}
+.btn-clear-period{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.btn-clear-period:hover{border-color:var(--accent4);color:var(--accent4)}
+.period-active-badge{
+  background:#e6f4df;color:#2e6b16;border-radius:20px;
+  padding:3px 10px;font-size:11px;font-weight:600;display:none;
+}
+.period-active-badge.show{display:inline-block}
+
+/* ── KPI ── */
+.kpi-area{padding:22px 40px 0}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.kpi-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;position:relative;overflow:hidden;
+  transition:transform .2s,border-color .2s,box-shadow .2s;cursor:pointer;
+}
+.kpi-card:hover{transform:translateY(-2px);border-color:var(--accent1);box-shadow:0 4px 16px rgba(91,173,58,.13)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.kpi-card:nth-child(1)::before{background:var(--accent1)}
+.kpi-card:nth-child(2)::before{background:var(--accent3)}
+.kpi-card:nth-child(3)::before{background:var(--accent2)}
+.kpi-card:nth-child(4)::before{background:var(--accent4)}
+.kpi-card:nth-child(5)::before{background:var(--accent5)}
+.kpi-label{color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.kpi-value{font-family:var(--font-head);font-size:32px;font-weight:800;line-height:1}
+.kpi-card:nth-child(1) .kpi-value{color:var(--accent1)}
+.kpi-card:nth-child(2) .kpi-value{color:var(--accent3)}
+.kpi-card:nth-child(3) .kpi-value{color:var(--accent2)}
+.kpi-card:nth-child(4) .kpi-value{color:var(--accent4)}
+.kpi-card:nth-child(5) .kpi-value{color:var(--accent5)}
+.kpi-sub{color:var(--muted);font-size:11px;margin-top:5px}
+.kpi-hint{font-size:10px;color:var(--accent1);margin-top:6px;opacity:.7}
+
+/* ── CHARTS ── */
+.main{padding:22px 40px 40px}
+.chart-grid{display:grid;gap:16px}
+.row-2{grid-template-columns:1fr 1fr}
+.row-3{grid-template-columns:1fr 1fr 1fr}
+.row-13{grid-template-columns:1fr 2fr}
+.mb{margin-bottom:16px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.chart-title{
+  font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--text);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.chart-title .dot{width:7px;height:7px;border-radius:50%;background:var(--accent1);flex-shrink:0}
+.chart-wrap{position:relative;width:100%}
+.chart-wrap.h180{height:180px}
+.chart-wrap.h220{height:220px}
+.chart-wrap.h260{height:260px}
+.chart-wrap.h280{height:280px}
+.chart-wrap.h300{height:300px}
+.chart-wrap.h340{height:340px}
+
+/* ── TOP LIST ── */
+.top-list{list-style:none}
+.top-list li{
+  display:flex;align-items:center;gap:10px;padding:7px 5px;
+  border-bottom:1px solid var(--border);cursor:pointer;border-radius:6px;
+  transition:background .15s;
+}
+.top-list li:hover{background:#eaf3e4}
+.top-list li:last-child{border-bottom:none}
+.top-list .rank{font-family:var(--font-head);font-size:10px;color:var(--muted);min-width:20px;font-weight:700}
+.top-list .bar-wrap{flex:1;display:flex;flex-direction:column;gap:2px}
+.top-list .name{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.top-list .bar-bg{height:4px;background:var(--border);border-radius:2px}
+.top-list .bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent1),var(--accent3));transition:width .8s ease}
+.top-list .count{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--accent1);min-width:32px;text-align:right}
+.top-list .tpct{font-size:10px;color:var(--muted);min-width:30px;text-align:right}
+
+/* ── STATE ── */
+.state-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent1);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.state-msg{color:var(--muted);font-size:14px}
+.error-box{background:#fff4ee;border:1px solid #f5c6a0;border-radius:var(--radius);padding:20px 24px;color:#c0392b;font-size:13px;max-width:600px;text-align:center;line-height:1.6}
+
+/* ── MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(44,62,45,.35);backdrop-filter:blur(4px);
+  z-index:1000;align-items:center;justify-content:center;padding:24px;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:#fff;border-radius:18px;width:100%;max-width:1040px;max-height:88vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 20px 60px rgba(44,62,45,.2);
+  animation:modalIn .2s ease;
+}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.modal-header{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text)}
+.modal-subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+.modal-close{background:var(--bg);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background .15s}
+.modal-close:hover{background:var(--border);color:var(--text)}
+.modal-search{padding:10px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-search input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:var(--font-body);font-size:13px;color:var(--text);outline:none;transition:border-color .2s}
+.modal-search input:focus{border-color:var(--accent1)}
+.modal-body{overflow-y:auto;flex:1;padding:0 24px 16px}
+.modal-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.modal-table th{text-align:left;padding:9px 10px;font-family:var(--font-head);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:2px solid var(--border);position:sticky;top:0;background:#fff;z-index:1}
+.modal-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.modal-table tr:last-child td{border-bottom:none}
+.modal-table tr:hover td{background:#f2f6f0}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-active{background:#e6f4df;color:#2e6b16}
+.badge-resign{background:#fde8e0;color:#c0392b}
+.modal-footer{padding:10px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.btn-export{background:var(--accent1);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-family:var(--font-body);cursor:pointer;transition:opacity .2s}
+.btn-export:hover{opacity:.85}
+
+/* ── EXPLORER / ATTRITION ── */
+.explorer-wrap{padding:22px 40px 40px}
+.explorer-controls{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 24px;margin-bottom:18px;
+  display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:16px;align-items:end;
+}
+.ctrl-group label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.ctrl-group select{width:100%;min-width:unset}
+.btn-run{
+  background:var(--accent1);color:#fff;border:none;border-radius:8px;
+  padding:0 22px;font-size:13px;font-weight:600;font-family:var(--font-body);
+  cursor:pointer;height:34px;white-space:nowrap;transition:opacity .2s;
+}
+.btn-run:hover{opacity:.85}
+.explorer-hint{font-size:12px;color:var(--muted);margin-bottom:14px}
+.explorer-result{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.explorer-result-header{
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.5px;
+}
+.explorer-table-wrap{overflow:auto;max-height:620px}
+.explorer-table{width:100%;border-collapse:collapse;font-size:12px}
+.explorer-table th{
+  text-align:left;padding:9px 14px;font-family:var(--font-head);font-size:10px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);
+  border-bottom:2px solid var(--border);position:sticky;top:0;background:#fff;z-index:1;
+  white-space:nowrap;
+}
+.explorer-table td{padding:9px 14px;border-bottom:1px solid var(--border)}
+.explorer-table tbody tr:hover td{background:#f2f6f0;cursor:pointer}
+.explorer-table .td-count{font-family:var(--font-head);font-weight:700;color:var(--accent1);text-align:right}
+.explorer-table .td-pct{color:var(--muted);text-align:right;font-size:11px}
+.row-lv1{background:#f5fbf2}
+.row-lv1 td:first-child{font-weight:700}
+.row-lv2 td:first-child{padding-left:28px}
+.row-lv3 td:first-child{padding-left:50px}
+.explorer-bar{display:inline-block;height:6px;background:var(--border);border-radius:3px;vertical-align:middle;margin-right:6px}
+.explorer-bar-fill{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent1),var(--accent3))}
+.explorer-empty{padding:48px;text-align:center;color:var(--muted);font-size:13px}
+.dim-badge{background:#eaf3e4;color:var(--accent5);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:5px}
+
+@media(max-width:1100px){
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .row-3{grid-template-columns:1fr 1fr}
+  .explorer-controls{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .header,.filter-bar,.main,.kpi-area,.explorer-wrap,.sub-header{padding:14px 16px}
+  .tab-bar{padding:0 16px}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .row-2,.row-3,.row-13{grid-template-columns:1fr}
+  .explorer-controls{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-title">
+    <h1>YOUR_COMPANY — Employee Demographic Dashboard</h1>
+    <p id="lastUpdated">Memuat data…</p>
+  </div>
+</header>
+
+<div class="sub-header">
+  <span id="filterSummary" style="font-size:11px;color:var(--muted)"></span>
+  <button class="btn-refresh" id="btnRefresh" onclick="loadData()">↻ Refresh Data</button>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+  <button class="tab-btn"        onclick="switchTab('attrition')">📉 Employee Attrition</button>
+  <button class="tab-btn"        onclick="switchTab('explorer')">🔍 Data Explorer</button>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+  <select id="filterCompany"  onchange="applyFilters()"><option value="">Semua Company</option></select>
+  <select id="filterEntity"   onchange="applyFilters()"><option value="">Semua Legal Entity</option></select>
+  <select id="filterDept"     onchange="applyFilters()"><option value="">Semua Department</option></select>
+  <select id="filterSubDept"  onchange="applyFilters()"><option value="">Semua Sub-Dept</option></select>
+  <select id="filterPosition" onchange="applyFilters()"><option value="">Semua Position</option></select>
+  <select id="filterStatus"   onchange="applyFilters()">
+    <option value="active">Aktif Saja</option>
+    <option value="">Aktif &amp; Resign</option>
+    <option value="resigned">Resign Saja</option>
+  </select>
+  <div class="filter-sep"></div>
+  <span class="filter-label">Periode Join:</span>
+  <button class="period-mode-btn active" id="pmAll"    onclick="setPeriodMode('all')">Semua</button>
+  <button class="period-mode-btn"        id="pmYear"   onclick="setPeriodMode('year')">Per Tahun</button>
+  <button class="period-mode-btn"        id="pmMonth"  onclick="setPeriodMode('month')">Per Bulan</button>
+  <button class="period-mode-btn"        id="pmCustom" onclick="setPeriodMode('custom')">Custom Range</button>
+  <div class="period-inputs" id="pinYear"   style="display:none">
+    <select id="selYear" onchange="applyFilters()"><option value="">Pilih tahun…</option></select>
+  </div>
+  <div class="period-inputs" id="pinMonth"  style="display:none">
+    <input type="month" id="selMonth" onchange="applyFilters()" />
+  </div>
+  <div class="period-inputs" id="pinCustom" style="display:none">
+    <input type="date" id="dateFrom" onchange="applyFilters()" />
+    <span style="color:var(--muted);font-size:12px">s/d</span>
+    <input type="date" id="dateTo"   onchange="applyFilters()" />
+  </div>
+  <button class="btn-clear-period" id="btnClearPeriod" onclick="clearPeriod()" style="display:none">✕ Reset</button>
+  <span class="period-active-badge" id="periodBadge"></span>
+</div>
+
+<div class="kpi-area">
+  <div class="kpi-row">
+    <div class="kpi-card" onclick="kpiClick(1)">
+      <div class="kpi-label">Total Karyawan</div>
+      <div class="kpi-value" id="kv1">—</div>
+      <div class="kpi-sub"  id="ks1">Memuat…</div>
+      <div class="kpi-hint">↗ klik untuk detail</div>
+    </div>
+    <div class="kpi-card" onclick="kpiClick(2)">
+      <div class="kpi-label">Karyawan Aktif</div>
+      <div class="kpi-value" id="kv2">—</div>
+      <div class="kpi-sub"  id="ks2">Memuat…</div>
+      <div class="kpi-hint">↗ klik untuk detail</div>
+    </div>
+    <div class="kpi-card" onclick="kpiClick(3)">
+      <div class="kpi-label">Rata-rata Usia</div>
+      <div class="kpi-value" id="kv3">—</div>
+      <div class="kpi-sub">tahun (karyawan aktif)</div>
+      <div class="kpi-hint">↗ klik untuk detail</div>
+    </div>
+    <div class="kpi-card" onclick="kpiClick(4)">
+      <div class="kpi-label">Rata-rata LoS</div>
+      <div class="kpi-value" id="kv4">—</div>
+      <div class="kpi-sub">tahun (karyawan aktif)</div>
+      <div class="kpi-hint">↗ klik untuk detail</div>
+    </div>
+    <div class="kpi-card" onclick="kpiClick(5)">
+      <div class="kpi-label">Total Sub-Dept</div>
+      <div class="kpi-value" id="kv5">—</div>
+      <div class="kpi-sub"  id="ks5">sub-dept aktif</div>
+      <div class="kpi-hint">↗ klik untuk detail</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: OVERVIEW -->
+<div id="tabOverview">
+  <main class="main" id="mainContent">
+    <div class="state-overlay"><div class="spinner"></div><p class="state-msg">Memuat data karyawan…</p></div>
+  </main>
+</div>
+
+<!-- TAB: ATTRITION -->
+<div id="tabAttrition" style="display:none">
+  <div class="explorer-wrap">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="filter-label">Granularitas:</span>
+      <button class="period-mode-btn active" id="attGranYear"  onclick="setAttGran('year')">Per Tahun</button>
+      <button class="period-mode-btn"        id="attGranMonth" onclick="setAttGran('month')">Per Bulan</button>
+      <div class="filter-sep"></div>
+      <span class="filter-label">Rentang Resign Date:</span>
+      <input type="date" id="attFrom" onchange="renderAttrition()" style="font-size:12px" />
+      <span style="color:var(--muted);font-size:12px">s/d</span>
+      <input type="date" id="attTo"   onchange="renderAttrition()" style="font-size:12px" />
+      <button class="btn-clear-period" onclick="clearAttRange()">✕ Reset</button>
+      <span style="font-size:11px;color:var(--muted);margin-left:4px">⚠️ Filter periode ini menggunakan <b>Resign Date</b></span>
+    </div>
+    <div class="kpi-row" style="margin-bottom:16px" id="attKpiRow">
+      <div class="kpi-card" onclick="openModal('New Joiner','Semua new joiner pada periode',_attJoinersInPeriod,'')"><div class="kpi-label">Total New Joiner</div><div class="kpi-value" id="attKv1" style="color:var(--accent1)">—</div><div class="kpi-sub" id="attKs1"></div><div class="kpi-hint">↗ klik untuk detail</div></div>
+      <div class="kpi-card" onclick="openModal('Resign','Semua resign pada periode',_attResignedInPeriod,'')"><div class="kpi-label">Total Resign</div><div class="kpi-value" id="attKv2" style="color:var(--accent4)">—</div><div class="kpi-sub" id="attKs2"></div><div class="kpi-hint">↗ klik untuk detail</div></div>
+      <div class="kpi-card"><div class="kpi-label">Turn Over Rate</div><div class="kpi-value" id="attKv3" style="color:var(--accent2)">—</div><div class="kpi-sub">% (resign / avg headcount)</div></div>
+      <div class="kpi-card"><div class="kpi-label">Retention Rate</div><div class="kpi-value" id="attKv4" style="color:var(--accent3)">—</div><div class="kpi-sub">% (karyawan yg tetap aktif)</div></div>
+    </div>
+    <div id="attritionContent">
+      <div class="state-overlay"><div class="spinner"></div><p class="state-msg">Memuat…</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: EXPLORER -->
+<div id="tabExplorer" style="display:none">
+  <div class="explorer-wrap">
+    <div class="explorer-controls">
+      <div class="ctrl-group">
+        <label>Dimensi 1 — Baris Utama</label>
+        <select id="exDim1">
+          <option value="department">Department</option>
+          <option value="subDept">Sub-Department</option>
+          <option value="gender">Gender</option>
+          <option value="ageGroup">Age Group</option>
+          <option value="losGroup">Length of Service</option>
+          <option value="jobLevel">Job Level</option>
+          <option value="grade">Grade</option>
+          <option value="contractType">Contract Type</option>
+          <option value="religion">Agama</option>
+          <option value="maritalStatus">Status Pernikahan</option>
+          <option value="branch">Branch</option>
+          <option value="legalEntity">Legal Entity</option>
+          <option value="company">Company</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label>Dimensi 2 — Sub-level (opsional)</label>
+        <select id="exDim2">
+          <option value="">— Tidak ada —</option>
+          <option value="gender">Gender</option>
+          <option value="ageGroup">Age Group</option>
+          <option value="losGroup">Length of Service</option>
+          <option value="jobLevel">Job Level</option>
+          <option value="grade">Grade</option>
+          <option value="contractType">Contract Type</option>
+          <option value="subDept">Sub-Department</option>
+          <option value="department">Department</option>
+          <option value="religion">Agama</option>
+          <option value="maritalStatus">Status Pernikahan</option>
+          <option value="branch">Branch</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label>Dimensi 3 — Detail (opsional)</label>
+        <select id="exDim3">
+          <option value="">— Tidak ada —</option>
+          <option value="gender">Gender</option>
+          <option value="ageGroup">Age Group</option>
+          <option value="losGroup">Length of Service</option>
+          <option value="jobLevel">Job Level</option>
+          <option value="grade">Grade</option>
+          <option value="contractType">Contract Type</option>
+          <option value="religion">Agama</option>
+          <option value="maritalStatus">Status Pernikahan</option>
+          <option value="position">Position</option>
+        </select>
+      </div>
+      <button class="btn-run" onclick="runExplorer()">▶ Tampilkan</button>
+    </div>
+    <p class="explorer-hint">💡 Contoh: Dim1 = <b>Department</b>, Dim2 = <b>Gender</b> → tabel + grafik otomatis muncul. Klik baris/segment untuk detail karyawan.</p>
+    <div id="explorerChartArea" style="display:none" class="mb">
+      <div class="chart-card">
+        <div class="chart-title" style="justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:8px"><span class="dot"></span><span id="exChartTitle">Grafik</span></span>
+        </div>
+        <div id="exChartTypeRow" style="display:flex;gap:6px;margin-bottom:12px"></div>
+        <div class="chart-wrap" id="exChartWrap" style="height:320px"><canvas id="exChart"></canvas></div>
+      </div>
+    </div>
+    <div class="explorer-result" id="explorerResult">
+      <div class="explorer-empty">Pilih dimensi di atas dan klik <b>▶ Tampilkan</b> untuk melihat cross-data.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title"    id="modalTitle">Detail Data</div>
+        <div class="modal-subtitle" id="modalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-search">
+      <input type="text" id="modalSearch" placeholder="Cari nama, posisi, department…" oninput="filterModalTable()" />
+    </div>
+    <div class="modal-body">
+      <table class="modal-table">
+        <thead id="modalThead"></thead>
+        <tbody id="modalTbody"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <span id="modalCount"></span>
+      <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+let rawData    = null;
+let filtered   = [];
+let chartInst  = {};
+let modalRows  = [];
+let _kpiData   = {};
+let currentTab = 'overview';
+let periodMode = 'all';
+let attGran    = 'year';
+let _attJoinersInPeriod  = [];
+let _attResignedInPeriod = [];
+
+const PALETTE = [
+  "#5BAD3A","#F5A623","#7DC052","#E05A2B","#3A8A5B",
+  "#A8D58A","#F5C842","#2E7D4F","#E8956D","#8BC34A",
+  "#4CAF50","#FF9800","#66BB6A","#FFA726","#43A047",
+];
+const getColor = i => PALETTE[i % PALETTE.length];
+
+Chart.defaults.color       = "#7A8C7B";
+Chart.defaults.borderColor = "#dde8d8";
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.register(ChartDataLabels);
+
+// ════════════════════════════════════════════════════════════
+// LoS Live Compute
+// ════════════════════════════════════════════════════════════
+function computeLoS(joinDateStr) {
+  if (!joinDateStr) return null;
+  const jd = new Date(joinDateStr);
+  if (isNaN(jd)) return null;
+  return Math.round((Date.now() - jd.getTime()) / (365.25*24*3600*1000) * 10) / 10;
+}
+function losToGroup(yrs) {
+  if (yrs == null) return "Unknown";
+  if (yrs < 1)  return "< 1 tahun";
+  if (yrs < 3)  return "1–3 tahun";
+  if (yrs < 5)  return "3–5 tahun";
+  if (yrs < 10) return "5–10 tahun";
+  return "> 10 tahun";
+}
+
+function isDummy(e) {
+  const org = (e.department||"").trim().toLowerCase();
+  const sub = (e.subDept||"").trim().toLowerCase();
+  const st  = (e.status||"").trim().toLowerCase();
+  return org === "dummy" || sub === "dummy" ||
+    ["dummy","dummy contract","dummy probation"].includes(st);
+}
+
+// ════════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  currentTab = tab;
+  const tabs = ['overview','attrition','explorer'];
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', tabs[i] === tab));
+  document.getElementById('tabOverview').style.display  = tab === 'overview'  ? '' : 'none';
+  document.getElementById('tabAttrition').style.display = tab === 'attrition' ? '' : 'none';
+  document.getElementById('tabExplorer').style.display  = tab === 'explorer'  ? '' : 'none';
+  if (tab === 'explorer'  && rawData) runExplorer();
+  if (tab === 'attrition' && rawData) renderAttrition();
+}
+
+// ════════════════════════════════════════════════════════════
+// PERIOD FILTER
+// ════════════════════════════════════════════════════════════
+function setPeriodMode(mode) {
+  periodMode = mode;
+  ['all','year','month','custom'].forEach(m => {
+    const cap = m.charAt(0).toUpperCase()+m.slice(1);
+    document.getElementById('pm'+cap).classList.toggle('active', m === mode);
+    const pin = document.getElementById('pin'+cap);
+    if (pin) pin.style.display = (m === mode && mode !== 'all') ? 'flex' : 'none';
+  });
+  document.getElementById('btnClearPeriod').style.display = mode === 'all' ? 'none' : '';
+  if (mode === 'all') document.getElementById('periodBadge').classList.remove('show');
+  applyFilters();
+}
+function clearPeriod() { setPeriodMode('all'); }
+
+function getPeriodFn() {
+  if (periodMode === 'all') return null;
+  if (periodMode === 'year') {
+    const y = document.getElementById('selYear').value;
+    if (!y) return null;
+    return e => e.joinDate && new Date(e.joinDate).getFullYear() === parseInt(y);
+  }
+  if (periodMode === 'month') {
+    const m = document.getElementById('selMonth').value;
+    if (!m) return null;
+    return e => {
+      if (!e.joinDate) return false;
+      const d = new Date(e.joinDate);
+      return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') === m;
+    };
+  }
+  if (periodMode === 'custom') {
+    const from = document.getElementById('dateFrom').value;
+    const to   = document.getElementById('dateTo').value;
+    if (!from && !to) return null;
+    const fd = from ? new Date(from) : null;
+    const td = to   ? new Date(to)   : null;
+    return e => {
+      if (!e.joinDate) return false;
+      const d = new Date(e.joinDate);
+      if (fd && d < fd) return false;
+      if (td && d > td) return false;
+      return true;
+    };
+  }
+  return null;
+}
+
+function updatePeriodBadge() {
+  const badge = document.getElementById('periodBadge');
+  if (periodMode === 'all') { badge.classList.remove('show'); return; }
+  let text = '';
+  if (periodMode === 'year')   { const y = document.getElementById('selYear').value;  text = y ? 'Tahun '+y : ''; }
+  if (periodMode === 'month')  { const m = document.getElementById('selMonth').value; text = m ? 'Bulan '+m : ''; }
+  if (periodMode === 'custom') {
+    const f = document.getElementById('dateFrom').value, t = document.getElementById('dateTo').value;
+    text = [f,t].filter(Boolean).join(' — ');
+  }
+  if (text) { badge.textContent = '📅 '+text; badge.classList.add('show'); }
+  else badge.classList.remove('show');
+}
+
+// ════════════════════════════════════════════════════════════
+// DATA LOAD
+// ════════════════════════════════════════════════════════════
+function loadData() {
+  const btn = document.getElementById("btnRefresh");
+  btn.disabled = true;
+  btn.textContent = "Loading…";
+  showLoading();
+
+  if (typeof google === 'undefined' || !google.script || !google.script.run) {
+    showError(
+      "Dashboard harus dibuka via URL Google Apps Script (Web App), bukan langsung sebagai file HTML.<br><br>" +
+      "<small>Cara buka: Deploy → Manage Deployments → copy URL deployment → buka URL tersebut di browser.</small>"
+    );
+    btn.disabled = false;
+    btn.textContent = "↻ Refresh Data";
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      try {
+        if (!data) {
+          showError("Apps Script tidak mengembalikan data.");
+          return;
+        }
+        if (data.error) {
+          showError("Error dari Apps Script:<br><br>" + data.error +
+            (data.stack ? "<br><br><small>" + data.stack + "</small>" : ""));
+          return;
+        }
+        if (!data.employees || !Array.isArray(data.employees)) {
+          showError("Format data tidak valid — field 'employees' tidak ditemukan.");
+          return;
+        }
+
+        rawData = data;
+
+        rawData.employees.forEach(e => {
+          const los = computeLoS(e.joinDate);
+          e.losLive    = los;
+          e.losDisplay = los !== null ? los.toFixed(1) : "—";
+          e.losGroup   = losToGroup(los);
+        });
+
+        document.getElementById("lastUpdated").textContent =
+          "Last updated: " + new Date(data.lastUpdated).toLocaleString("id-ID") +
+          " · " + data.totalRows.toLocaleString("id") + " baris total";
+
+        populateFilters(data.employees);
+        applyFilters();
+      } catch (err) {
+        showError("Data diterima tapi gagal diproses.<br><br><small>" + err.message + "</small>");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "↻ Refresh Data";
+      }
+    })
+    .withFailureHandler(function(err) {
+      showError("Gagal memanggil Apps Script.<br><br><small>" +
+        (err && err.message ? err.message : String(err)) + "</small>");
+      btn.disabled = false;
+      btn.textContent = "↻ Refresh Data";
+    })
+    .getData();
+}
+
+function populateFilters(employees) {
+  const clean = employees.filter(e => !isDummy(e));
+  const uniq  = key => [...new Set(clean.map(e => e[key]).filter(Boolean))].sort();
+  fillSelect("filterCompany",  uniq("company"));
+  fillSelect("filterEntity",   uniq("legalEntity"));
+  fillSelect("filterDept",     uniq("department"));
+  fillSelect("filterSubDept",  uniq("subDept"));
+  fillSelect("filterPosition", uniq("position"));
+  const years = [...new Set(clean.map(e => e.joinDate ? new Date(e.joinDate).getFullYear() : null).filter(Boolean))].sort((a,b) => b-a);
+  fillSelect("selYear", years.map(String));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('filterDept').addEventListener('change', function() {
+    if (!rawData) return;
+    const dv = this.value;
+    const clean = rawData.employees.filter(e => !isDummy(e));
+    const sub = dv ? clean.filter(e => e.department === dv) : clean;
+    fillSelect("filterSubDept",  [...new Set(sub.map(e => e.subDept).filter(Boolean))].sort());
+    fillSelect("filterPosition", [...new Set(sub.map(e => e.position).filter(Boolean))].sort());
+  });
+  document.getElementById('filterSubDept').addEventListener('change', function() {
+    if (!rawData) return;
+    const dv = document.getElementById('filterDept').value;
+    const sv = this.value;
+    const clean = rawData.employees.filter(e => !isDummy(e));
+    let sub = dv ? clean.filter(e => e.department === dv) : clean;
+    sub = sv ? sub.filter(e => e.subDept === sv) : sub;
+    fillSelect("filterPosition", [...new Set(sub.map(e => e.position).filter(Boolean))].sort());
+  });
+});
+
+function fillSelect(id, options) {
+  const sel = document.getElementById(id); if (!sel) return;
+  const cur = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  options.forEach(o => { const opt = document.createElement("option"); opt.value = opt.textContent = o; sel.appendChild(opt); });
+  if (cur) sel.value = cur;
+}
+
+function applyFilters() {
+  if (!rawData) return;
+  const company  = document.getElementById("filterCompany").value;
+  const entity   = document.getElementById("filterEntity").value;
+  const dept     = document.getElementById("filterDept").value;
+  const subDept  = document.getElementById("filterSubDept").value;
+  const position = document.getElementById("filterPosition").value;
+  const statusF  = document.getElementById("filterStatus").value;
+  const periodFn = getPeriodFn();
+  updatePeriodBadge();
+
+  filtered = rawData.employees.filter(e => {
+    if (isDummy(e)) return false;
+    if (company  && e.company     !== company)  return false;
+    if (entity   && e.legalEntity !== entity)   return false;
+    if (dept     && e.department  !== dept)     return false;
+    if (subDept  && e.subDept     !== subDept)  return false;
+    if (position && e.position    !== position) return false;
+    if (statusF === "active"   && !e.isActive)  return false;
+    if (statusF === "resigned" &&  e.isActive)  return false;
+    if (periodFn && !periodFn(e)) return false;
+    return true;
+  });
+
+  const parts = [];
+  if (company)  parts.push(company);
+  if (entity)   parts.push(entity);
+  if (dept)     parts.push(dept);
+  if (subDept)  parts.push(subDept);
+  if (position) parts.push(position);
+  document.getElementById('filterSummary').textContent =
+    parts.length ? 'Filter aktif: ' + parts.join(' · ') : '';
+
+  renderDashboard();
+  if (currentTab === 'explorer'  && rawData) runExplorer();
+  if (currentTab === 'attrition' && rawData) renderAttrition();
+}
+
+// ════════════════════════════════════════════════════════════
+// KPI CLICK
+// ════════════════════════════════════════════════════════════
+function kpiClick(n) {
+  const d = _kpiData; if (!d.active) return;
+  if (n===1) openModal('Total Karyawan',       d.kpiSub1,                          d.filtered, '');
+  if (n===2) openModal('Karyawan Aktif',        d.active.length+' karyawan aktif',  d.active,   '');
+  if (n===3) openModal('Distribusi Usia',       'Diurutkan dari tertua',            d.active,   'age');
+  if (n===4) openModal('Distribusi LoS',        'Diurutkan dari terlama',           d.active,   'los');
+  if (n===5) openModal('Sub-Department Aktif',  d.uniqueSubDepts+' sub-dept unik',   d.active,   '');
+}
+
+// ════════════════════════════════════════════════════════════
+// OVERVIEW RENDER
+// ════════════════════════════════════════════════════════════
+function renderDashboard() {
+  Object.values(chartInst).forEach(c => c.destroy()); chartInst = {};
+  const statusF  = document.getElementById("filterStatus").value;
+  const active   = filtered.filter(e =>  e.isActive);
+  const resigned = filtered.filter(e => !e.isActive);
+  const avgAge   = avg(active.map(e => e.age).filter(v => v != null));
+  const avgLoS   = avg(active.map(e => e.losLive).filter(v => v != null));
+  const gb = (arr, key) => {
+    const r = {};
+    arr.forEach(e => { const v = String(e[key]||"Unknown").trim()||"Unknown"; r[v]=(r[v]||0)+1; });
+    return Object.fromEntries(Object.entries(r).sort((a,b) => b[1]-a[1]));
+  };
+  let kpiSub1, kpiSub2;
+  if (statusF === "active")        { kpiSub1 = "Karyawan Aktif";  kpiSub2 = "Semua aktif"; }
+  else if (statusF === "resigned") { kpiSub1 = "Karyawan Resign"; kpiSub2 = "Semua resign"; }
+  else { kpiSub1 = "Aktif + Resign"; kpiSub2 = pct(active.length,filtered.length)+"% aktif dari total"; }
+  const uniqueSubDepts = new Set(active.map(e => (e.subDept||"Unknown").trim())).size;
+  _kpiData = { filtered, active, resigned, kpiSub1, kpiSub2, uniqueSubDepts };
+
+  document.getElementById("kv1").textContent = filtered.length.toLocaleString("id");
+  document.getElementById("ks1").textContent = kpiSub1;
+  document.getElementById("kv2").textContent = active.length.toLocaleString("id");
+  document.getElementById("ks2").textContent = kpiSub2;
+  document.getElementById("kv3").textContent = avgAge.toFixed(1);
+  document.getElementById("kv4").textContent = avgLoS.toFixed(1);
+  document.getElementById("kv5").textContent = uniqueSubDepts;
+  document.getElementById("ks5").textContent = "sub-dept ("+active.length+" aktif)";
+
+  const html = `
+    <div class="chart-grid row-3 mb">
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Gender</div><div class="chart-wrap h180"><canvas id="cGender"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Status Karyawan (Tipe Kontrak)</div><div class="chart-wrap h180"><canvas id="cContract"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Agama</div><div class="chart-wrap h180"><canvas id="cReligion"></canvas></div></div>
+    </div>
+    <div class="chart-grid row-13 mb">
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Age Group</div><div class="chart-wrap h220"><canvas id="cAge"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Top Department</div><ul class="top-list" id="deptList"></ul></div>
+    </div>
+    <div class="chart-grid row-2 mb">
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Job Level</div><div class="chart-wrap h300"><canvas id="cJobLevel"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Length of Service</div><div class="chart-wrap h300"><canvas id="cLoS"></canvas></div></div>
+    </div>
+    <div class="chart-grid row-2 mb">
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Sub-Department (Top 15)</div><div class="chart-wrap h340"><canvas id="cSubDept"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Status Pernikahan</div><div class="chart-wrap h340"><canvas id="cMarital"></canvas></div></div>
+    </div>
+    <div class="chart-grid row-2 mb">
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Legal Entity</div><div class="chart-wrap h260"><canvas id="cEntity"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Top Branch</div><ul class="top-list" id="branchList"></ul></div>
+    </div>
+    ${resigned.length > 0 ? `<div class="chart-grid mb"><div class="chart-card"><div class="chart-title"><span class="dot"></span>Resign Reason</div><div class="chart-wrap h260"><canvas id="cResign"></canvas></div></div></div>` : ''}
+  `;
+  document.getElementById("mainContent").innerHTML = html;
+
+  const gbA = key => gb(active, key);
+  const ageOrder = ["< 25","25–30","31–35","36–40","41–45","> 45"];
+  const losOrder = ["< 1 tahun","1–3 tahun","3–5 tahun","5–10 tahun","> 10 tahun"];
+
+  mkDoughnut("cGender",   gbA("gender"),         lbl => openModal("Gender: "+lbl,       "", active.filter(e=>(e.gender||"Unknown")===lbl),''));
+  mkDoughnut("cContract",gbA("status"),         lbl => openModal("Status: "+lbl,       "", active.filter(e=>(e.status||"Unknown")===lbl),''));
+  mkDoughnut("cReligion",gbA("religion"),       lbl => openModal("Agama: "+lbl,        "", active.filter(e=>(e.religion||"Unknown")===lbl),''));
+  mkDoughnut("cMarital", gbA("maritalStatus"),  lbl => openModal("Status Nikah: "+lbl, "", active.filter(e=>(e.maritalStatus||"Unknown")===lbl),''));
+  mkDoughnut("cEntity",  gb(filtered,"legalEntity"), lbl => openModal("Legal Entity: "+lbl,"", filtered.filter(e=>(e.legalEntity||"Unknown")===lbl),''));
+  mkBar("cAge",      reorder(gbA("ageGroup"), ageOrder), {horizontal:false},     lbl => openModal("Age Group: "+lbl,"",  active.filter(e=>(e.ageGroup||"Unknown")===lbl),'age'));
+  mkBar("cLoS",      reorder(gbA("losGroup"), losOrder), {horizontal:false},     lbl => openModal("LoS: "+lbl,"",        active.filter(e=>(e.losGroup||"Unknown")===lbl),'los'));
+  mkBar("cJobLevel", gbA("jobLevel"),   {horizontal:true,top:12}, lbl => openModal("Job Level: "+lbl,"",   active.filter(e=>(e.jobLevel||"Unknown")===lbl),''));
+  mkBar("cSubDept",  gbA("subDept"),    {horizontal:true,top:15}, lbl => openModal("Sub-Dept: "+lbl,"",    active.filter(e=>(e.subDept||"Unknown")===lbl),''));
+  if (resigned.length > 0)
+    mkBar("cResign", gb(resigned.filter(e=>e.resignReason),"resignReason"),{horizontal:true,top:8},
+      lbl => openModal("Resign Reason: "+lbl,"",resigned.filter(e=>e.resignReason===lbl),''));
+  renderTopList("deptList",  gbA("department"), 10, name => openModal("Dept: "+name,"",  active.filter(e=>e.department===name),''));
+  renderTopList("branchList",gbA("branch"),     10, name => openModal("Branch: "+name,"",active.filter(e=>e.branch===name),''));
+}
+
+// ════════════════════════════════════════════════════════════
+// DATA EXPLORER
+// ════════════════════════════════════════════════════════════
+const DIM_LABELS = {
+  department:"Department",subDept:"Sub-Department",gender:"Gender",
+  ageGroup:"Age Group",losGroup:"Length of Service",jobLevel:"Job Level",
+  grade:"Grade",contractType:"Contract Type",religion:"Agama",
+  maritalStatus:"Status Pernikahan",
+  branch:"Branch",legalEntity:"Legal Entity",company:"Company",
+  position:"Position",
+};
+function gv(e,dim) { const v = e[dim]; return (v && String(v).trim()) ? String(v).trim() : "Unknown"; }
+function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+let _exPool=[], _exDim1='', _exDim2='', _exDim3='';
+
+function runExplorer() {
+  const dim1 = document.getElementById("exDim1").value;
+  const dim2 = document.getElementById("exDim2").value;
+  const dim3 = document.getElementById("exDim3").value;
+  const pool = filtered.filter(e => e.isActive);
+  _exPool=pool; _exDim1=dim1; _exDim2=dim2; _exDim3=dim3;
+  if (!pool.length) {
+    document.getElementById("explorerResult").innerHTML='<div class="explorer-empty">Tidak ada data aktif pada filter ini.</div>';
+    document.getElementById("explorerChartArea").style.display='none';
+    return;
+  }
+  const tree={};
+  pool.forEach(e => {
+    const v1=gv(e,dim1);
+    if(!tree[v1]) tree[v1]={count:0,subs:{}};
+    tree[v1].count++;
+    if(dim2){
+      const v2=gv(e,dim2);
+      if(!tree[v1].subs[v2]) tree[v1].subs[v2]={count:0,subs:{}};
+      tree[v1].subs[v2].count++;
+      if(dim3){
+        const v3=gv(e,dim3);
+        if(!tree[v1].subs[v2].subs[v3]) tree[v1].subs[v2].subs[v3]={count:0};
+        tree[v1].subs[v2].subs[v3].count++;
+      }
+    }
+  });
+  const total = pool.length;
+  const keys1 = Object.keys(tree).sort((a,b)=>tree[b].count-tree[a].count);
+  const max1  = keys1.length ? tree[keys1[0]].count : 1;
+  let rows='';
+  keys1.forEach(k1 => {
+    const n1=tree[k1].count, p1=(n1/total*100).toFixed(1);
+    rows+=`<tr class="row-lv1" onclick='exOpenModal(${JSON.stringify(dim1)},${JSON.stringify(k1)},"","","","")'>
+      <td>${esc(k1)}<span class="dim-badge">${esc(DIM_LABELS[dim1]||dim1)}</span></td>
+      <td class="td-count">${n1}</td><td class="td-pct">${p1}%</td>
+      <td><span class="explorer-bar" style="width:${Math.max(40,n1/max1*120).toFixed(0)}px"><span class="explorer-bar-fill" style="width:100%"></span></span></td>
+    </tr>`;
+    if(dim2){
+      const keys2=Object.keys(tree[k1].subs).sort((a,b)=>tree[k1].subs[b].count-tree[k1].subs[a].count);
+      const max2=keys2.length?tree[k1].subs[keys2[0]].count:1;
+      keys2.forEach(k2=>{
+        const n2=tree[k1].subs[k2].count,p2=(n2/total*100).toFixed(1),p2of1=(n2/n1*100).toFixed(0);
+        rows+=`<tr class="row-lv2" onclick='exOpenModal(${JSON.stringify(dim1)},${JSON.stringify(k1)},${JSON.stringify(dim2)},${JSON.stringify(k2)},"","")'>
+          <td>&nbsp;&nbsp;&nbsp;&#8627; ${esc(k2)}<span style="color:var(--muted);font-size:10px">(${p2of1}% dari ${esc(k1)})</span></td>
+          <td class="td-count">${n2}</td><td class="td-pct">${p2}%</td>
+          <td><span class="explorer-bar" style="width:${Math.max(30,n2/max2*100).toFixed(0)}px"><span class="explorer-bar-fill" style="width:100%"></span></span></td>
+        </tr>`;
+        if(dim3){
+          const keys3=Object.keys(tree[k1].subs[k2].subs).sort((a,b)=>tree[k1].subs[k2].subs[b].count-tree[k1].subs[k2].subs[a].count);
+          keys3.forEach(k3=>{
+            const n3=tree[k1].subs[k2].subs[k3].count,p3=(n3/total*100).toFixed(1),p3of2=(n3/n2*100).toFixed(0);
+            rows+=`<tr class="row-lv3" onclick='exOpenModal(${JSON.stringify(dim1)},${JSON.stringify(k1)},${JSON.stringify(dim2)},${JSON.stringify(k2)},${JSON.stringify(dim3)},${JSON.stringify(k3)})'>
+              <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; ${esc(k3)}<span style="color:var(--muted);font-size:10px">(${p3of2}% dari ${esc(k2)})</span></td>
+              <td class="td-count">${n3}</td><td class="td-pct">${p3}%</td><td></td>
+            </tr>`;
+          });
+        }
+      });
+    }
+  });
+  const dimTitle=[DIM_LABELS[dim1],dim2&&DIM_LABELS[dim2],dim3&&DIM_LABELS[dim3]].filter(Boolean).join(' › ');
+  document.getElementById("explorerResult").innerHTML=`
+    <div class="explorer-result-header">
+      <span>📊 ${esc(dimTitle)} &mdash; ${total.toLocaleString("id")} karyawan aktif</span>
+      <span style="font-size:11px;font-weight:400;color:var(--muted)">${keys1.length} grup utama &middot; Klik baris untuk detail</span>
+    </div>
+    <div class="explorer-table-wrap">
+      <table class="explorer-table">
+        <thead><tr>
+          <th>${esc(DIM_LABELS[dim1]||dim1)}${dim2?' + '+esc(DIM_LABELS[dim2]||dim2):''}${dim3?' + '+esc(DIM_LABELS[dim3]||dim3):''}</th>
+          <th style="text-align:right">Jumlah</th><th style="text-align:right">% Total</th><th>Proporsi</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  renderExplorerChart(dim1,dim2,dim3,tree,keys1,total);
+}
+
+function renderExplorerChart(dim1,dim2,dim3,tree,keys1,total){
+  if(chartInst['exChart']){chartInst['exChart'].destroy();delete chartInst['exChart'];}
+  const chartArea=document.getElementById('explorerChartArea');
+  const titleEl  =document.getElementById('exChartTitle');
+  const typeRow  =document.getElementById('exChartTypeRow');
+  const wrapEl   =document.getElementById('exChartWrap');
+  chartArea.style.display='';
+  typeRow.innerHTML='';
+  const displayKeys=keys1.slice(0,20);
+  const isHorizontal=displayKeys.length>8;
+  wrapEl.style.height=Math.max(300,isHorizontal?displayKeys.length*28:320)+'px';
+  if(!dim2){
+    titleEl.textContent='Distribusi '+(DIM_LABELS[dim1]||dim1);
+    const values=displayKeys.map(k=>tree[k].count);
+    chartInst['exChart']=new Chart(document.getElementById('exChart'),{
+      type:'bar',
+      data:{labels:displayKeys,datasets:[{data:values,backgroundColor:displayKeys.map((_,i)=>getColor(i)),borderRadius:4,borderSkipped:false}]},
+      options:{
+        indexAxis:isHorizontal?'y':'x',responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          datalabels:{anchor:isHorizontal?'end':'end',align:isHorizontal?'right':'top',color:'#2C3E2D',font:{size:10,weight:'600'},formatter:v=>`${v} (${((v/total)*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:c=>{const v=c.parsed[isHorizontal?'x':'y'];return ` ${v.toLocaleString('id')} (${((v/total)*100).toFixed(1)}%)`;}}},
+        },
+        layout:{padding:{right:isHorizontal?70:0,top:isHorizontal?0:24}},
+        scales:{x:{grid:{color:"#dde8d8"},ticks:{font:{size:10}}},y:{grid:{color:"#dde8d8"},ticks:{font:{size:10}}}},
+        onClick:(evt,els)=>{if(!els.length) return;exOpenModal(dim1,displayKeys[els[0].index],'','','','');}
+      }
+    });
+  } else {
+    const allDim2=[...new Set(displayKeys.flatMap(k1=>Object.keys(tree[k1].subs)))].sort();
+    typeRow.innerHTML=`
+      <span style="font-size:11px;color:var(--muted);margin-right:4px;line-height:26px">Tampilan:</span>
+      <button class="period-mode-btn ex-mode-btn active" data-mode="stacked"  onclick="buildExChart('stacked')">Stacked</button>
+      <button class="period-mode-btn ex-mode-btn"        data-mode="grouped"  onclick="buildExChart('grouped')">Grouped</button>
+      <button class="period-mode-btn ex-mode-btn"        data-mode="percent"  onclick="buildExChart('percent')">100%</button>
+    `;
+    titleEl.textContent=(DIM_LABELS[dim1]||dim1)+' × '+(DIM_LABELS[dim2]||dim2);
+    window.buildExChart = mode => {
+      document.querySelectorAll('.ex-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+      if(chartInst['exChart']){chartInst['exChart'].destroy();delete chartInst['exChart'];}
+      const isP=mode==='percent',isG=mode==='grouped',isH=displayKeys.length>6;
+      wrapEl.style.height=Math.max(300,isH?displayKeys.length*(isG?allDim2.length*14+10:28):360)+'px';
+      const datasets=allDim2.map((d2,i)=>({
+        label:d2,
+        data:displayKeys.map(k1=>{
+          const raw=tree[k1].subs[d2]?.count||0;
+          if(!isP) return raw;
+          const rt=Object.values(tree[k1].subs).reduce((s,v)=>s+v.count,0)||1;
+          return parseFloat((raw/rt*100).toFixed(1));
+        }),
+        backgroundColor:getColor(i),borderRadius:3,borderSkipped:false,
+      }));
+      chartInst['exChart']=new Chart(document.getElementById('exChart'),{
+        type:'bar',data:{labels:displayKeys,datasets},
+        options:{
+          indexAxis:isH?'y':'x',responsive:true,maintainAspectRatio:false,
+          plugins:{
+            legend:{position:'top',labels:{boxWidth:10,padding:10,font:{size:11}}},
+            datalabels:{display:false},
+            tooltip:{mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed[isH?'x':'y'];return ` ${c.dataset.label}: ${isP?v+'%':v.toLocaleString('id')}`;  }}}
+          },
+          scales:{
+            x:{stacked:!isG,grid:{color:"#dde8d8"},ticks:{font:{size:10}},max:isP?100:undefined},
+            y:{stacked:!isG,grid:{color:"#dde8d8"},ticks:{font:{size:10}}}
+          },
+          onClick:(evt,els)=>{if(!els.length) return;exOpenModal(dim1,displayKeys[els[0].index],dim2,allDim2[els[0].datasetIndex],'','');}
+        }
+      });
+    };
+    window.buildExChart('stacked');
+  }
+}
+
+function exOpenModal(d1,k1,d2,k2,d3,k3){
+  let emps=_exPool.filter(e=>gv(e,d1)===k1);
+  let title=(DIM_LABELS[d1]||d1)+': '+k1;
+  if(d2&&d2!=='null'&&k2&&k2!=='null'){emps=emps.filter(e=>gv(e,d2)===k2);title+=' › '+k2;}
+  if(d3&&d3!=='null'&&k3&&k3!=='null'){emps=emps.filter(e=>gv(e,d3)===k3);title+=' › '+k3;}
+  openModal(title,emps.length+' karyawan aktif',emps,'');
+}
+
+// ════════════════════════════════════════════════════════════
+// CHART BUILDERS
+// ════════════════════════════════════════════════════════════
+function mkDoughnut(id,dataObj,onClickFn){
+  const labels=Object.keys(dataObj),values=Object.values(dataObj);
+  const total=values.reduce((a,b)=>a+b,0);
+  const ctx=document.getElementById(id); if(!ctx) return;
+  chartInst[id]=new Chart(ctx,{
+    type:"doughnut",
+    data:{labels,datasets:[{data:values,backgroundColor:labels.map((_,i)=>getColor(i)),borderWidth:2,borderColor:"#fff",hoverOffset:6}]},
+    options:{
+      responsive:true,maintainAspectRatio:true,cutout:"55%",
+      plugins:{
+        legend:{position:"bottom",labels:{boxWidth:10,padding:9,font:{size:11}}},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed.toLocaleString("id")} (${((c.parsed/total)*100).toFixed(1)}%)`}},
+        datalabels:{display:ctx=>ctx.dataset.data[ctx.dataIndex]/total>0.04,color:'#fff',font:{size:11,weight:'700'},formatter:val=>`${((val/total)*100).toFixed(0)}%`}
+      },
+      onClick:(evt,els)=>{if(els.length&&onClickFn) onClickFn(labels[els[0].index]);}
+    }
+  });
+}
+
+function mkBar(id,dataObj,opts={},onClickFn){
+  const{horizontal=false,top=0}=opts;
+  let entries=Object.entries(dataObj);
+  if(top>0) entries=entries.sort((a,b)=>b[1]-a[1]).slice(0,top);
+  const labels=entries.map(e=>e[0]),values=entries.map(e=>e[1]);
+  const total=values.reduce((a,b)=>a+b,0);
+  const ctx=document.getElementById(id); if(!ctx) return;
+  chartInst[id]=new Chart(ctx,{
+    type:"bar",
+    data:{labels,datasets:[{data:values,backgroundColor:labels.map((_,i)=>getColor(i)),borderRadius:5,borderSkipped:false}]},
+    options:{
+      indexAxis:horizontal?"y":"x",responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>{const v=c.parsed[horizontal?"x":"y"];return ` ${v.toLocaleString("id")} (${((v/total)*100).toFixed(1)}%)`; }}},
+        datalabels:{anchor:horizontal?'end':'end',align:horizontal?'right':'top',color:'#2C3E2D',font:{size:10,weight:'600'},formatter:val=>val>0?`${val} (${((val/total)*100).toFixed(0)}%)`:''
+        ,clip:false}
+      },
+      scales:{x:{grid:{color:"#dde8d8"},ticks:{font:{size:11}}},y:{grid:{color:"#dde8d8"},ticks:{font:{size:11}}}},
+      layout:{padding:{top:horizontal?0:22,right:horizontal?80:0}},
+      onClick:(evt,els)=>{if(els.length&&onClickFn) onClickFn(labels[els[0].index]);}
+    }
+  });
+}
+
+function renderTopList(id,dataObj,limit=10,onClickFn){
+  const el=document.getElementById(id); if(!el) return;
+  const entries=Object.entries(dataObj).sort((a,b)=>b[1]-a[1]).slice(0,limit);
+  const total=entries.reduce((s,[,c])=>s+c,0);
+  const max=entries[0]?.[1]||1;
+  el.innerHTML=entries.map(([name,count],i)=>`
+    <li onclick="(${onClickFn.toString()})(${JSON.stringify(name)})">
+      <span class="rank">#${i+1}</span>
+      <div class="bar-wrap">
+        <span class="name" title="${name}">${name}</span>
+        <div class="bar-bg"><div class="bar-fill" style="width:${(count/max*100).toFixed(1)}%"></div></div>
+      </div>
+      <span class="count">${count.toLocaleString("id")}</span>
+      <span class="tpct">${(count/total*100).toFixed(0)}%</span>
+    </li>`).join("");
+}
+
+// ════════════════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════════════════
+function openModal(title,subtitle,employees,sortBy){
+  let rows=[...employees];
+  if(sortBy==="age") rows.sort((a,b)=>(b.age||0)-(a.age||0));
+  if(sortBy==="los") rows.sort((a,b)=>(b.losLive||0)-(a.losLive||0));
+  modalRows=rows;
+  document.getElementById("modalTitle").textContent=title;
+  document.getElementById("modalSubtitle").textContent=subtitle||rows.length+" karyawan";
+  document.getElementById("modalSearch").value="";
+  renderModalTable(rows);
+  document.getElementById("modalOverlay").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+
+function renderModalTable(rows){
+  document.getElementById("modalCount").textContent="Menampilkan "+rows.length+" karyawan";
+  document.getElementById("modalThead").innerHTML=`
+    <tr>
+      <th>Nama</th><th>Department</th><th>Sub-Dept</th><th>Posisi</th>
+      <th>Job Level</th><th>Gender</th><th>Usia</th><th>LoS (thn)</th>
+      <th>Join Date</th><th>Resign Date</th><th>Branch</th><th>Status</th>
+    </tr>`;
+  document.getElementById("modalTbody").innerHTML=rows.map(e=>`
+    <tr>
+      <td><b>${e.name||"-"}</b></td>
+      <td>${e.department||"-"}</td>
+      <td>${e.subDept||"-"}</td>
+      <td>${e.position||"-"}</td>
+      <td>${e.jobLevel||"-"}</td>
+      <td>${e.gender||"-"}</td>
+      <td>${e.age!=null?e.age:"-"}</td>
+      <td>${e.losDisplay||"-"}</td>
+      <td style="white-space:nowrap">${e.joinDate||"-"}</td>
+      <td style="white-space:nowrap">${e.resignDate||"-"}</td>
+      <td>${e.branch||"-"}</td>
+      <td><span class="badge ${e.isActive?'badge-active':'badge-resign'}">${e.isActive?"Aktif":"Resign"}</span></td>
+    </tr>`).join("");
+}
+
+function filterModalTable(){
+  const q=document.getElementById("modalSearch").value.toLowerCase();
+  renderModalTable(modalRows.filter(e=>
+    (e.name||"").toLowerCase().includes(q)||
+    (e.department||"").toLowerCase().includes(q)||
+    (e.subDept||"").toLowerCase().includes(q)||
+    (e.position||"").toLowerCase().includes(q)||
+    (e.branch||"").toLowerCase().includes(q)
+  ));
+}
+
+function closeModalOutside(evt){if(evt.target===document.getElementById("modalOverlay")) closeModalDirect();}
+function closeModalDirect(){document.getElementById("modalOverlay").classList.remove("open");document.body.style.overflow="";}
+document.addEventListener("keydown",e=>{if(e.key==="Escape") closeModalDirect();});
+
+function exportCSV(){
+  const q=document.getElementById("modalSearch").value.toLowerCase();
+  const rows=modalRows.filter(e=>!q||(e.name||"").toLowerCase().includes(q)||(e.department||"").toLowerCase().includes(q));
+  const hdr=["Nama","Department","Sub Dept","Posisi","Job Level","Gender","Usia","LoS (thn)","Join Date","Resign Date","Status","Branch","Legal Entity","Agama","Status Pernikahan","Contract Type"];
+  const csv=[hdr,...rows.map(e=>[
+    e.name,e.department,e.subDept,e.position,e.jobLevel,
+    e.gender,e.age,e.losDisplay||"",e.joinDate,e.resignDate||"",
+    e.isActive?"Aktif":"Resign",e.branch,e.legalEntity,
+    e.religion,e.maritalStatus,e.contractType
+  ])].map(r=>r.map(v=>`"${(v||"").toString().replace(/"/g,'\\"')}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
+  a.download="export_"+document.getElementById("modalTitle").textContent.replace(/[\s:›\/]/g,"_")+".csv";
+  a.click();
+}
+
+// ════════════════════════════════════════════════════════════
+// ATTRITION
+// ════════════════════════════════════════════════════════════
+function setAttGran(g){
+  attGran=g;
+  document.getElementById('attGranYear').classList.toggle('active',g==='year');
+  document.getElementById('attGranMonth').classList.toggle('active',g==='month');
+  renderAttrition();
+}
+function clearAttRange(){
+  document.getElementById('attFrom').value='';
+  document.getElementById('attTo').value='';
+  renderAttrition();
+}
+function getPeriodKey(dateStr,gran){
+  if(!dateStr) return null;
+  const d=new Date(dateStr);
+  if(isNaN(d)) return null;
+  if(gran==='year') return String(d.getFullYear());
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+
+function renderAttrition(){
+  if(!rawData) return;
+  Object.keys(chartInst).filter(k=>k.startsWith('att')).forEach(k=>{chartInst[k].destroy();delete chartInst[k];});
+  const attFrom=document.getElementById('attFrom').value;
+  const attTo  =document.getElementById('attTo').value;
+  const fd=attFrom?new Date(attFrom):null;
+  const td=attTo  ?new Date(attTo)  :null;
+  const company =document.getElementById("filterCompany").value;
+  const entity  =document.getElementById("filterEntity").value;
+  const dept    =document.getElementById("filterDept").value;
+  const subDept =document.getElementById("filterSubDept").value;
+  const position=document.getElementById("filterPosition").value;
+  const base=rawData.employees.filter(e=>{
+    if(isDummy(e)) return false;
+    if(company  &&e.company    !==company)  return false;
+    if(entity   &&e.legalEntity!==entity)   return false;
+    if(dept     &&e.department !==dept)     return false;
+    if(subDept  &&e.subDept    !==subDept)  return false;
+    if(position &&e.position   !==position) return false;
+    return true;
+  });
+
+  const inJoinPeriod=dateStr=>{
+    if(!dateStr) return !fd&&!td;
+    const d=new Date(dateStr); if(isNaN(d)) return false;
+    if(fd&&d<fd) return false;
+    if(td&&d>td) return false;
+    return true;
+  };
+  const inResignPeriod=dateStr=>{
+    if(!dateStr) return false;
+    const d=new Date(dateStr); if(isNaN(d)) return false;
+    if(fd&&d<fd) return false;
+    if(td&&d>td) return false;
+    return true;
+  };
+
+  const joiners          = base.filter(e=>inJoinPeriod(e.joinDate));
+  const resignedInPeriod = base.filter(e=>!e.isActive && inResignPeriod(e.resignDate));
+  _attJoinersInPeriod  = joiners;
+  _attResignedInPeriod = resignedInPeriod;
+
+  const companies=[...new Set(base.map(e=>e.company||'Unknown').filter(Boolean))].sort();
+  const companyColors={}; companies.forEach((c,i)=>companyColors[c]=getColor(i));
+
+  const gbByPeriodCo=(arr,dateField)=>{
+    const r={};
+    arr.forEach(e=>{
+      const p=getPeriodKey(e[dateField],attGran); if(!p) return;
+      const c=e.company||'Unknown';
+      if(!r[p]) r[p]={};
+      r[p][c]=(r[p][c]||0)+1;
+    });
+    return r;
+  };
+  const joinersByPC=gbByPeriodCo(joiners,'joinDate');
+  const resignByPC =gbByPeriodCo(resignedInPeriod,'resignDate');
+  const allPeriods=[...new Set([...Object.keys(joinersByPC),...Object.keys(resignByPC)])].sort();
+  const mkDatasets=(byPC)=>companies.map((c,i)=>({
+    label:c,
+    data:allPeriods.map(p=>(byPC[p]&&byPC[p][c])||0),
+    backgroundColor:companyColors[c],borderRadius:3,borderSkipped:false,
+  }));
+  const joinerDatasets=mkDatasets(joinersByPC);
+  const resignDatasets =mkDatasets(resignByPC);
+  const joinerVals=allPeriods.map(p=>Object.values(joinersByPC[p]||{}).reduce((a,b)=>a+b,0));
+  const resignVals =allPeriods.map(p=>Object.values(resignByPC[p] ||{}).reduce((a,b)=>a+b,0));
+  const totalJoiners=joiners.length;
+  const totalResign =resignedInPeriod.length;
+  const activeCount =base.filter(e=>e.isActive).length;
+  const avgHC       =Math.max(1,Math.round((activeCount+totalResign)/2));
+  const torRate     =(totalResign/avgHC*100).toFixed(1);
+  const retRate     =((avgHC-totalResign)/avgHC*100).toFixed(1);
+
+  document.getElementById('attKv1').textContent=totalJoiners.toLocaleString('id');
+  document.getElementById('attKs1').textContent=allPeriods.length+' periode';
+  document.getElementById('attKv2').textContent=totalResign.toLocaleString('id');
+  document.getElementById('attKs2').textContent='dari '+base.length+' total karyawan';
+  document.getElementById('attKv3').textContent=torRate+'%';
+  document.getElementById('attKv4').textContent=retRate+'%';
+
+  const gbPos={};
+  base.forEach(e=>{const pos=(e.position||'Unknown').trim();if(!gbPos[pos]) gbPos[pos]={total:0,resign:0};gbPos[pos].total++;});
+  resignedInPeriod.forEach(e=>{const pos=(e.position||'Unknown').trim();if(!gbPos[pos]) gbPos[pos]={total:0,resign:0};gbPos[pos].resign++;});
+  const torByPos=Object.entries(gbPos)
+    .map(([pos,d])=>({pos,resign:d.resign,total:d.total,tor:d.total>0?(d.resign/d.total*100).toFixed(1):'0.0'}))
+    .filter(d=>d.resign>0).sort((a,b)=>parseFloat(b.tor)-parseFloat(a.tor)).slice(0,15);
+
+  const periodLabel=attFrom||attTo?`${attFrom||'…'} s/d ${attTo||'…'}`:'Semua periode';
+
+  document.getElementById('attritionContent').innerHTML=`
+    <div class="chart-grid row-2 mb">
+      <div class="chart-card">
+        <div class="chart-title"><span class="dot"></span>New Joiner per Periode (Join Date)</div>
+        <div class="chart-wrap h280"><canvas id="attCJoin"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="dot" style="background:var(--accent4)"></span>Resign per Periode (Resign Date)</div>
+        <div class="chart-wrap h280"><canvas id="attCResign"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-grid mb">
+      <div class="chart-card">
+        <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>Trend Gabungan: New Joiner vs Resign</div>
+        <div class="chart-wrap h260"><canvas id="attCTrend"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-grid mb">
+      <div class="chart-card">
+        <div class="chart-title">
+          <span class="dot" style="background:var(--accent2)"></span>
+          Turn Over Rate per Posisi — Top 15
+          <span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:8px">Periode resign: ${periodLabel}</span>
+        </div>
+        ${torByPos.length===0
+          ? '<p style="color:var(--muted);font-size:13px;padding:16px 0">Tidak ada data resign pada periode ini.</p>'
+          : `<div style="overflow:auto;max-height:440px">
+          <table class="explorer-table" style="font-size:12px">
+            <thead><tr>
+              <th>Posisi</th>
+              <th style="text-align:right">Resign (periode)</th>
+              <th style="text-align:right">Total HC</th>
+              <th style="text-align:right">TOR %</th>
+              <th style="min-width:120px">Proporsi</th>
+            </tr></thead>
+            <tbody>\${torByPos.map(d=>`
+              <tr style="cursor:pointer" onclick="openModal('TOR: ${esc(d.pos)}','${d.resign} resign · TOR ${d.tor}%',_attResignedInPeriod.filter(e=>(e.position||'Unknown').trim()==='${d.pos.replace(/'/g,"\\'")}'),'')">
+                <td>${esc(d.pos)}</td>
+                <td class="td-count">${d.resign}</td>
+                <td style="text-align:right;color:var(--muted)">${d.total}</td>
+                <td class="td-count" style="color:var(--accent4)">${d.tor}%</td>
+                <td>
+                  <span class="explorer-bar" style="width:120px">
+                    <span class="explorer-bar-fill" style="width:${Math.min(100,parseFloat(d.tor))}%;background:var(--accent4)"></span>
+                  </span>
+                  <span style="font-size:10px;color:var(--muted);margin-left:4px">${d.tor}%</span>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`}
+      </div>
+    </div>
+  `;
+
+  const stackedOpts=(datasets,clickFn)=>({
+    type:'bar',data:{labels:allPeriods,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'top',labels:{boxWidth:10,padding:10,font:{size:11}}},
+        datalabels:{display:false},
+        tooltip:{mode:'index',intersect:false}
+      },
+      scales:{
+        x:{stacked:true,grid:{color:"#dde8d8"},ticks:{font:{size:10}}},
+        y:{stacked:true,grid:{color:"#dde8d8"},beginAtZero:true,ticks:{font:{size:10}}}
+      },
+      onClick:clickFn
+    }
+  });
+  chartInst['attCJoin']=new Chart(document.getElementById('attCJoin'),
+    stackedOpts(joinerDatasets,(evt,els)=>{
+      if(!els.length) return;
+      const p=allPeriods[els[0].index],co=companies[els[0].datasetIndex];
+      openModal('New Joiner: '+p+' — '+co,'',joiners.filter(e=>getPeriodKey(e.joinDate,attGran)===p&&(e.company||'Unknown')===co),'');
+    })
+  );
+  chartInst['attCResign']=new Chart(document.getElementById('attCResign'),
+    stackedOpts(resignDatasets,(evt,els)=>{
+      if(!els.length) return;
+      const p=allPeriods[els[0].index],co=companies[els[0].datasetIndex];
+      openModal('Resign: '+p+' — '+co,'',resignedInPeriod.filter(e=>getPeriodKey(e.resignDate,attGran)===p&&(e.company||'Unknown')===co),'');
+    })
+  );
+  chartInst['attCTrend']=new Chart(document.getElementById('attCTrend'),{
+    type:'line',
+    data:{
+      labels:allPeriods,
+      datasets:[
+        {label:'New Joiner',data:joinerVals,borderColor:'#5BAD3A',backgroundColor:'rgba(91,173,58,0.1)',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:6},
+        {label:'Resign',    data:resignVals, borderColor:'#E05A2B',backgroundColor:'rgba(224,90,43,0.08)',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:6}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'top',labels:{boxWidth:12,padding:14,font:{size:12}}},
+        datalabels:{display:false},
+        tooltip:{mode:'index',intersect:false}
+      },
+      scales:{
+        x:{grid:{color:"#dde8d8"},ticks:{font:{size:10}}},
+        y:{grid:{color:"#dde8d8"},beginAtZero:true,ticks:{font:{size:10}}}
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════════
+function reorder(obj,order){
+  const r={};
+  order.forEach(k=>{if(obj[k]!==undefined) r[k]=obj[k];});
+  Object.keys(obj).forEach(k=>{if(!r[k]) r[k]=obj[k];});
+  return r;
+}
+function avg(arr){const c=arr.filter(v=>v!=null&&!isNaN(v));return c.length?Math.round(c.reduce((a,b)=>a+b,0)/c.length*10)/10:0;}
+function pct(a,b){return b>0?Math.round(a/b*100):0;}
+function showLoading(){document.getElementById("mainContent").innerHTML='<div class="state-overlay"><div class="spinner"></div><p class="state-msg">Memuat data karyawan…</p></div>';}
+function showError(msg){document.getElementById("mainContent").innerHTML='<div class="state-overlay"><div class="error-box">❌ '+msg+'</div></div>';}
+
+// Auto-load
+loadData();
+</script>
+</body>
+</html>
