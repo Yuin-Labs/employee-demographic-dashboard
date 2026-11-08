@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Employee Demographic Dashboard</title>
+<!-- External libraries for charts and fonts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 <style>
+/* Base styling and color variables */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#f2f6f0;--surface:#ffffff;--card:#ffffff;--border:#dde8d8;
@@ -18,7 +20,6 @@
 }
 body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;min-height:100vh}
 
-/* ── HEADER ── */
 .header{
   background:linear-gradient(135deg,#fff 0%,#eaf3e4 100%);
   border-bottom:1px solid var(--border);
@@ -33,7 +34,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-si
 }
 .header-title p{color:var(--muted);font-size:12px;margin-top:2px}
 
-/* ── SUB-HEADER ── */
 .sub-header{
   background:var(--surface);border-bottom:1px solid var(--border);
   padding:8px 40px;display:flex;align-items:center;justify-content:flex-end;gap:8px;
@@ -46,7 +46,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-si
 .btn-refresh:hover{opacity:.85}
 .btn-refresh:disabled{opacity:.4;cursor:not-allowed}
 
-/* ── TABS ── */
 .tab-bar{
   background:var(--surface);border-bottom:2px solid var(--border);
   padding:0 40px;display:flex;gap:0;
@@ -60,7 +59,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-si
 .tab-btn:hover{color:var(--text)}
 .tab-btn.active{color:var(--accent1);border-bottom-color:var(--accent1);font-weight:700}
 
-/* ── FILTER BAR ── */
 .filter-bar{
   background:var(--surface);border-bottom:1px solid var(--border);
   padding:10px 40px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
@@ -93,7 +91,6 @@ select:focus,input:focus{border-color:var(--accent1)}
 }
 .period-active-badge.show{display:inline-block}
 
-/* ── KPI ── */
 .kpi-area{padding:22px 40px 0}
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
 .kpi-card{
@@ -118,7 +115,6 @@ select:focus,input:focus{border-color:var(--accent1)}
 .kpi-sub{color:var(--muted);font-size:11px;margin-top:5px}
 .kpi-hint{font-size:10px;color:var(--accent1);margin-top:6px;opacity:.7}
 
-/* ── CHARTS ── */
 .main{padding:22px 40px 40px}
 .chart-grid{display:grid;gap:16px}
 .row-2{grid-template-columns:1fr 1fr}
@@ -140,7 +136,6 @@ select:focus,input:focus{border-color:var(--accent1)}
 .chart-wrap.h300{height:300px}
 .chart-wrap.h340{height:340px}
 
-/* ── TOP LIST ── */
 .top-list{list-style:none}
 .top-list li{
   display:flex;align-items:center;gap:10px;padding:7px 5px;
@@ -157,14 +152,12 @@ select:focus,input:focus{border-color:var(--accent1)}
 .top-list .count{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--accent1);min-width:32px;text-align:right}
 .top-list .tpct{font-size:10px;color:var(--muted);min-width:30px;text-align:right}
 
-/* ── STATE ── */
 .state-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:16px}
 .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent1);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .state-msg{color:var(--muted);font-size:14px}
 .error-box{background:#fff4ee;border:1px solid #f5c6a0;border-radius:var(--radius);padding:20px 24px;color:#c0392b;font-size:13px;max-width:600px;text-align:center;line-height:1.6}
 
-/* ── MODAL ── */
 .modal-overlay{
   display:none;position:fixed;inset:0;
   background:rgba(44,62,45,.35);backdrop-filter:blur(4px);
@@ -199,7 +192,6 @@ select:focus,input:focus{border-color:var(--accent1)}
 .btn-export{background:var(--accent1);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-family:var(--font-body);cursor:pointer;transition:opacity .2s}
 .btn-export:hover{opacity:.85}
 
-/* ── EXPLORER / ATTRITION ── */
 .explorer-wrap{padding:22px 40px 40px}
 .explorer-controls{
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
@@ -261,7 +253,7 @@ select:focus,input:focus{border-color:var(--accent1)}
 <header class="header">
   <div class="header-title">
     <h1>YOUR_COMPANY — Employee Demographic Dashboard</h1>
-    <p id="lastUpdated">Memuat data…</p>
+    <p id="lastUpdated">Loading data...</p>
   </div>
 </header>
 
@@ -278,31 +270,31 @@ select:focus,input:focus{border-color:var(--accent1)}
 
 <div class="filter-bar">
   <span class="filter-label">Filter:</span>
-  <select id="filterCompany"  onchange="applyFilters()"><option value="">Semua Company</option></select>
-  <select id="filterEntity"   onchange="applyFilters()"><option value="">Semua Legal Entity</option></select>
-  <select id="filterDept"     onchange="applyFilters()"><option value="">Semua Department</option></select>
-  <select id="filterSubDept"  onchange="applyFilters()"><option value="">Semua Sub-Dept</option></select>
-  <select id="filterPosition" onchange="applyFilters()"><option value="">Semua Position</option></select>
+  <select id="filterCompany"  onchange="applyFilters()"><option value="">All Companies</option></select>
+  <select id="filterEntity"   onchange="applyFilters()"><option value="">All Legal Entities</option></select>
+  <select id="filterDept"     onchange="applyFilters()"><option value="">All Departments</option></select>
+  <select id="filterSubDept"  onchange="applyFilters()"><option value="">All Sub-Depts</option></select>
+  <select id="filterPosition" onchange="applyFilters()"><option value="">All Positions</option></select>
   <select id="filterStatus"   onchange="applyFilters()">
-    <option value="active">Aktif Saja</option>
-    <option value="">Aktif &amp; Resign</option>
-    <option value="resigned">Resign Saja</option>
+    <option value="active">Active Only</option>
+    <option value="">Active &amp; Resigned</option>
+    <option value="resigned">Resigned Only</option>
   </select>
   <div class="filter-sep"></div>
-  <span class="filter-label">Periode Join:</span>
-  <button class="period-mode-btn active" id="pmAll"    onclick="setPeriodMode('all')">Semua</button>
-  <button class="period-mode-btn"        id="pmYear"   onclick="setPeriodMode('year')">Per Tahun</button>
-  <button class="period-mode-btn"        id="pmMonth"  onclick="setPeriodMode('month')">Per Bulan</button>
+  <span class="filter-label">Join Period:</span>
+  <button class="period-mode-btn active" id="pmAll"    onclick="setPeriodMode('all')">All</button>
+  <button class="period-mode-btn"        id="pmYear"   onclick="setPeriodMode('year')">Yearly</button>
+  <button class="period-mode-btn"        id="pmMonth"  onclick="setPeriodMode('month')">Monthly</button>
   <button class="period-mode-btn"        id="pmCustom" onclick="setPeriodMode('custom')">Custom Range</button>
   <div class="period-inputs" id="pinYear"   style="display:none">
-    <select id="selYear" onchange="applyFilters()"><option value="">Pilih tahun…</option></select>
+    <select id="selYear" onchange="applyFilters()"><option value="">Select year...</option></select>
   </div>
   <div class="period-inputs" id="pinMonth"  style="display:none">
     <input type="month" id="selMonth" onchange="applyFilters()" />
   </div>
   <div class="period-inputs" id="pinCustom" style="display:none">
     <input type="date" id="dateFrom" onchange="applyFilters()" />
-    <span style="color:var(--muted);font-size:12px">s/d</span>
+    <span style="color:var(--muted);font-size:12px">to</span>
     <input type="date" id="dateTo"   onchange="applyFilters()" />
   </div>
   <button class="btn-clear-period" id="btnClearPeriod" onclick="clearPeriod()" style="display:none">✕ Reset</button>
@@ -312,78 +304,78 @@ select:focus,input:focus{border-color:var(--accent1)}
 <div class="kpi-area">
   <div class="kpi-row">
     <div class="kpi-card" onclick="kpiClick(1)">
-      <div class="kpi-label">Total Karyawan</div>
+      <div class="kpi-label">Total Employees</div>
       <div class="kpi-value" id="kv1">—</div>
-      <div class="kpi-sub"  id="ks1">Memuat…</div>
-      <div class="kpi-hint">↗ klik untuk detail</div>
+      <div class="kpi-sub"  id="ks1">Loading...</div>
+      <div class="kpi-hint">↗ click for details</div>
     </div>
     <div class="kpi-card" onclick="kpiClick(2)">
-      <div class="kpi-label">Karyawan Aktif</div>
+      <div class="kpi-label">Active Employees</div>
       <div class="kpi-value" id="kv2">—</div>
-      <div class="kpi-sub"  id="ks2">Memuat…</div>
-      <div class="kpi-hint">↗ klik untuk detail</div>
+      <div class="kpi-sub"  id="ks2">Loading...</div>
+      <div class="kpi-hint">↗ click for details</div>
     </div>
     <div class="kpi-card" onclick="kpiClick(3)">
-      <div class="kpi-label">Rata-rata Usia</div>
+      <div class="kpi-label">Average Age</div>
       <div class="kpi-value" id="kv3">—</div>
-      <div class="kpi-sub">tahun (karyawan aktif)</div>
-      <div class="kpi-hint">↗ klik untuk detail</div>
+      <div class="kpi-sub">years (active employees)</div>
+      <div class="kpi-hint">↗ click for details</div>
     </div>
     <div class="kpi-card" onclick="kpiClick(4)">
-      <div class="kpi-label">Rata-rata LoS</div>
+      <div class="kpi-label">Average LoS</div>
       <div class="kpi-value" id="kv4">—</div>
-      <div class="kpi-sub">tahun (karyawan aktif)</div>
-      <div class="kpi-hint">↗ klik untuk detail</div>
+      <div class="kpi-sub">years (active employees)</div>
+      <div class="kpi-hint">↗ click for details</div>
     </div>
     <div class="kpi-card" onclick="kpiClick(5)">
-      <div class="kpi-label">Total Sub-Dept</div>
+      <div class="kpi-label">Total Sub-Depts</div>
       <div class="kpi-value" id="kv5">—</div>
-      <div class="kpi-sub"  id="ks5">sub-dept aktif</div>
-      <div class="kpi-hint">↗ klik untuk detail</div>
+      <div class="kpi-sub"  id="ks5">active sub-depts</div>
+      <div class="kpi-hint">↗ click for details</div>
     </div>
   </div>
 </div>
 
-<!-- TAB: OVERVIEW -->
+<!-- Tab: Overview -->
 <div id="tabOverview">
   <main class="main" id="mainContent">
-    <div class="state-overlay"><div class="spinner"></div><p class="state-msg">Memuat data karyawan…</p></div>
+    <div class="state-overlay"><div class="spinner"></div><p class="state-msg">Loading employee data...</p></div>
   </main>
 </div>
 
-<!-- TAB: ATTRITION -->
+<!-- Tab: Attrition -->
 <div id="tabAttrition" style="display:none">
   <div class="explorer-wrap">
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span class="filter-label">Granularitas:</span>
-      <button class="period-mode-btn active" id="attGranYear"  onclick="setAttGran('year')">Per Tahun</button>
-      <button class="period-mode-btn"        id="attGranMonth" onclick="setAttGran('month')">Per Bulan</button>
+      <span class="filter-label">Granularity:</span>
+      <button class="period-mode-btn active" id="attGranYear"  onclick="setAttGran('year')">Yearly</button>
+      <button class="period-mode-btn"        id="attGranMonth" onclick="setAttGran('month')">Monthly</button>
       <div class="filter-sep"></div>
-      <span class="filter-label">Rentang Resign Date:</span>
+      <span class="filter-label">Resign Date Range:</span>
       <input type="date" id="attFrom" onchange="renderAttrition()" style="font-size:12px" />
-      <span style="color:var(--muted);font-size:12px">s/d</span>
+      <span style="color:var(--muted);font-size:12px">to</span>
       <input type="date" id="attTo"   onchange="renderAttrition()" style="font-size:12px" />
       <button class="btn-clear-period" onclick="clearAttRange()">✕ Reset</button>
-      <span style="font-size:11px;color:var(--muted);margin-left:4px">⚠️ Filter periode ini menggunakan <b>Resign Date</b></span>
+      <span style="font-size:11px;color:var(--muted);margin-left:4px">⚠️ This period filter uses <b>Resign Date</b></span>
     </div>
     <div class="kpi-row" style="margin-bottom:16px" id="attKpiRow">
-      <div class="kpi-card" onclick="openModal('New Joiner','Semua new joiner pada periode',_attJoinersInPeriod,'')"><div class="kpi-label">Total New Joiner</div><div class="kpi-value" id="attKv1" style="color:var(--accent1)">—</div><div class="kpi-sub" id="attKs1"></div><div class="kpi-hint">↗ klik untuk detail</div></div>
-      <div class="kpi-card" onclick="openModal('Resign','Semua resign pada periode',_attResignedInPeriod,'')"><div class="kpi-label">Total Resign</div><div class="kpi-value" id="attKv2" style="color:var(--accent4)">—</div><div class="kpi-sub" id="attKs2"></div><div class="kpi-hint">↗ klik untuk detail</div></div>
-      <div class="kpi-card"><div class="kpi-label">Turn Over Rate</div><div class="kpi-value" id="attKv3" style="color:var(--accent2)">—</div><div class="kpi-sub">% (resign / avg headcount)</div></div>
-      <div class="kpi-card"><div class="kpi-label">Retention Rate</div><div class="kpi-value" id="attKv4" style="color:var(--accent3)">—</div><div class="kpi-sub">% (karyawan yg tetap aktif)</div></div>
+      <div class="kpi-card" onclick="openModal('New Joiner','All new joiners in period',_attJoinersInPeriod,'')"><div class="kpi-label">Total New Joiners</div><div class="kpi-value" id="attKv1" style="color:var(--accent1)">—</div><div class="kpi-sub" id="attKs1"></div><div class="kpi-hint">↗ click for details</div></div>
+      <div class="kpi-card" onclick="openModal('Resigned','All resignations in period',_attResignedInPeriod,'')"><div class="kpi-label">Total Resigned</div><div class="kpi-value" id="attKv2" style="color:var(--accent4)">—</div><div class="kpi-sub" id="attKs2"></div><div class="kpi-hint">↗ click for details</div></div>
+      <div class="kpi-card"><div class="kpi-label">Turn Over Rate</div><div class="kpi-value" id="attKv3" style="color:var(--accent2)">—</div><div class="kpi-sub">% (resigned / avg headcount)</div></div>
+      <div class="kpi-card"><div class="kpi-label">Retention Rate</div><div class="kpi-value" id="attKv4" style="color:var(--accent3)">—</div><div class="kpi-sub">% (employees who remain active)</div></div>
     </div>
     <div id="attritionContent">
-      <div class="state-overlay"><div class="spinner"></div><p class="state-msg">Memuat…</p></div>
+      <div class="state-overlay"><div class="spinner"></div><p class="state-msg">Loading...</p></div>
     </div>
   </div>
 </div>
 
-<!-- TAB: EXPLORER -->
+<!-- Tab: Data Explorer -->
 <div id="tabExplorer" style="display:none">
   <div class="explorer-wrap">
     <div class="explorer-controls">
       <div class="ctrl-group">
-        <label>Dimensi 1 — Baris Utama</label>
+        <label>Dimension 1 — Main Row</label>
         <select id="exDim1">
           <option value="department">Department</option>
           <option value="subDept">Sub-Department</option>
@@ -393,17 +385,17 @@ select:focus,input:focus{border-color:var(--accent1)}
           <option value="jobLevel">Job Level</option>
           <option value="grade">Grade</option>
           <option value="contractType">Contract Type</option>
-          <option value="religion">Agama</option>
-          <option value="maritalStatus">Status Pernikahan</option>
+          <option value="religion">Religion</option>
+          <option value="maritalStatus">Marital Status</option>
           <option value="branch">Branch</option>
           <option value="legalEntity">Legal Entity</option>
           <option value="company">Company</option>
         </select>
       </div>
       <div class="ctrl-group">
-        <label>Dimensi 2 — Sub-level (opsional)</label>
+        <label>Dimension 2 — Sub-level (optional)</label>
         <select id="exDim2">
-          <option value="">— Tidak ada —</option>
+          <option value="">— None —</option>
           <option value="gender">Gender</option>
           <option value="ageGroup">Age Group</option>
           <option value="losGroup">Length of Service</option>
@@ -412,56 +404,56 @@ select:focus,input:focus{border-color:var(--accent1)}
           <option value="contractType">Contract Type</option>
           <option value="subDept">Sub-Department</option>
           <option value="department">Department</option>
-          <option value="religion">Agama</option>
-          <option value="maritalStatus">Status Pernikahan</option>
+          <option value="religion">Religion</option>
+          <option value="maritalStatus">Marital Status</option>
           <option value="branch">Branch</option>
         </select>
       </div>
       <div class="ctrl-group">
-        <label>Dimensi 3 — Detail (opsional)</label>
+        <label>Dimension 3 — Detail (optional)</label>
         <select id="exDim3">
-          <option value="">— Tidak ada —</option>
+          <option value="">— None —</option>
           <option value="gender">Gender</option>
           <option value="ageGroup">Age Group</option>
           <option value="losGroup">Length of Service</option>
           <option value="jobLevel">Job Level</option>
           <option value="grade">Grade</option>
           <option value="contractType">Contract Type</option>
-          <option value="religion">Agama</option>
-          <option value="maritalStatus">Status Pernikahan</option>
+          <option value="religion">Religion</option>
+          <option value="maritalStatus">Marital Status</option>
           <option value="position">Position</option>
         </select>
       </div>
-      <button class="btn-run" onclick="runExplorer()">▶ Tampilkan</button>
+      <button class="btn-run" onclick="runExplorer()">▶ Apply</button>
     </div>
-    <p class="explorer-hint">💡 Contoh: Dim1 = <b>Department</b>, Dim2 = <b>Gender</b> → tabel + grafik otomatis muncul. Klik baris/segment untuk detail karyawan.</p>
+    <p class="explorer-hint">💡 Example: Dim1 = <b>Department</b>, Dim2 = <b>Gender</b> → chart and table will generate automatically. Click rows to view employee details.</p>
     <div id="explorerChartArea" style="display:none" class="mb">
       <div class="chart-card">
         <div class="chart-title" style="justify-content:space-between">
-          <span style="display:flex;align-items:center;gap:8px"><span class="dot"></span><span id="exChartTitle">Grafik</span></span>
+          <span style="display:flex;align-items:center;gap:8px"><span class="dot"></span><span id="exChartTitle">Chart</span></span>
         </div>
         <div id="exChartTypeRow" style="display:flex;gap:6px;margin-bottom:12px"></div>
         <div class="chart-wrap" id="exChartWrap" style="height:320px"><canvas id="exChart"></canvas></div>
       </div>
     </div>
     <div class="explorer-result" id="explorerResult">
-      <div class="explorer-empty">Pilih dimensi di atas dan klik <b>▶ Tampilkan</b> untuk melihat cross-data.</div>
+      <div class="explorer-empty">Select dimensions above and click <b>▶ Apply</b> to view cross-data.</div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- Reusable Modal (Popup) -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
     <div class="modal-header">
       <div>
-        <div class="modal-title"    id="modalTitle">Detail Data</div>
+        <div class="modal-title"    id="modalTitle">Data Details</div>
         <div class="modal-subtitle" id="modalSubtitle"></div>
       </div>
       <button class="modal-close" onclick="closeModalDirect()">✕</button>
     </div>
     <div class="modal-search">
-      <input type="text" id="modalSearch" placeholder="Cari nama, posisi, department…" oninput="filterModalTable()" />
+      <input type="text" id="modalSearch" placeholder="Search name, position, department..." oninput="filterModalTable()" />
     </div>
     <div class="modal-body">
       <table class="modal-table">
@@ -477,9 +469,7 @@ select:focus,input:focus{border-color:var(--accent1)}
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════════════════════
+// State Management
 let rawData    = null;
 let filtered   = [];
 let chartInst  = {};
@@ -503,9 +493,7 @@ Chart.defaults.borderColor = "#dde8d8";
 Chart.defaults.font.family = "'DM Sans', sans-serif";
 Chart.register(ChartDataLabels);
 
-// ════════════════════════════════════════════════════════════
-// LoS Live Compute
-// ════════════════════════════════════════════════════════════
+// [EXPLANATION] Length of Service (LoS) calculation
 function computeLoS(joinDateStr) {
   if (!joinDateStr) return null;
   const jd = new Date(joinDateStr);
@@ -514,13 +502,14 @@ function computeLoS(joinDateStr) {
 }
 function losToGroup(yrs) {
   if (yrs == null) return "Unknown";
-  if (yrs < 1)  return "< 1 tahun";
-  if (yrs < 3)  return "1–3 tahun";
-  if (yrs < 5)  return "3–5 tahun";
-  if (yrs < 10) return "5–10 tahun";
-  return "> 10 tahun";
+  if (yrs < 1)  return "< 1 year";
+  if (yrs < 3)  return "1–3 years";
+  if (yrs < 5)  return "3–5 years";
+  if (yrs < 10) return "5–10 years";
+  return "> 10 years";
 }
 
+// [EXPLANATION] Excludes dummy data from reports
 function isDummy(e) {
   const org = (e.department||"").trim().toLowerCase();
   const sub = (e.subDept||"").trim().toLowerCase();
@@ -529,10 +518,9 @@ function isDummy(e) {
     ["dummy","dummy contract","dummy probation"].includes(st);
 }
 
-// ════════════════════════════════════════════════════════════
-// TABS
-// ════════════════════════════════════════════════════════════
+// [EXPLANATION] Handles navigation between tabs (Overview, Attrition, Explorer)
 function switchTab(tab) {
+  console.log(`[UI] Switching tab to: ${tab}`);
   currentTab = tab;
   const tabs = ['overview','attrition','explorer'];
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', tabs[i] === tab));
@@ -543,9 +531,6 @@ function switchTab(tab) {
   if (tab === 'attrition' && rawData) renderAttrition();
 }
 
-// ════════════════════════════════════════════════════════════
-// PERIOD FILTER
-// ════════════════════════════════════════════════════════════
 function setPeriodMode(mode) {
   periodMode = mode;
   ['all','year','month','custom'].forEach(m => {
@@ -560,6 +545,7 @@ function setPeriodMode(mode) {
 }
 function clearPeriod() { setPeriodMode('all'); }
 
+// [EXPLANATION] Generates a filter function based on selected time period
 function getPeriodFn() {
   if (periodMode === 'all') return null;
   if (periodMode === 'year') {
@@ -597,8 +583,8 @@ function updatePeriodBadge() {
   const badge = document.getElementById('periodBadge');
   if (periodMode === 'all') { badge.classList.remove('show'); return; }
   let text = '';
-  if (periodMode === 'year')   { const y = document.getElementById('selYear').value;  text = y ? 'Tahun '+y : ''; }
-  if (periodMode === 'month')  { const m = document.getElementById('selMonth').value; text = m ? 'Bulan '+m : ''; }
+  if (periodMode === 'year')   { const y = document.getElementById('selYear').value;  text = y ? 'Year '+y : ''; }
+  if (periodMode === 'month')  { const m = document.getElementById('selMonth').value; text = m ? 'Month '+m : ''; }
   if (periodMode === 'custom') {
     const f = document.getElementById('dateFrom').value, t = document.getElementById('dateTo').value;
     text = [f,t].filter(Boolean).join(' — ');
@@ -607,20 +593,19 @@ function updatePeriodBadge() {
   else badge.classList.remove('show');
 }
 
-// ════════════════════════════════════════════════════════════
-// DATA LOAD
-// ════════════════════════════════════════════════════════════
+// [EXPLANATION] This is the core function fetching data from Google Apps Script Backend (Code.gs)
 function loadData() {
+  console.log("[Data Fetch] Requesting data from Apps Script Backend...");
   const btn = document.getElementById("btnRefresh");
   btn.disabled = true;
-  btn.textContent = "Loading…";
+  btn.textContent = "Loading...";
   showLoading();
 
   if (typeof google === 'undefined' || !google.script || !google.script.run) {
-    showError(
-      "Dashboard harus dibuka via URL Google Apps Script (Web App), bukan langsung sebagai file HTML.<br><br>" +
-      "<small>Cara buka: Deploy → Manage Deployments → copy URL deployment → buka URL tersebut di browser.</small>"
-    );
+    const errHtml = "Dashboard must be opened via Google Apps Script URL (Web App), not directly as an HTML file.<br><br>" +
+      "<small>How to open: Deploy → Manage Deployments → copy deployment URL → open that URL in browser.</small>";
+    console.error("[Data Fetch Error] Google Script API not found.");
+    showError(errHtml);
     btn.disabled = false;
     btn.textContent = "↻ Refresh Data";
     return;
@@ -628,23 +613,26 @@ function loadData() {
 
   google.script.run
     .withSuccessHandler(function(data) {
+      console.log("[Data Fetch Success] Raw payload received:", data);
       try {
         if (!data) {
-          showError("Apps Script tidak mengembalikan data.");
+          showError("Apps Script did not return any data.");
           return;
         }
         if (data.error) {
-          showError("Error dari Apps Script:<br><br>" + data.error +
+          console.error("[Backend Error]", data.error);
+          showError("Error from Apps Script:<br><br>" + data.error +
             (data.stack ? "<br><br><small>" + data.stack + "</small>" : ""));
           return;
         }
         if (!data.employees || !Array.isArray(data.employees)) {
-          showError("Format data tidak valid — field 'employees' tidak ditemukan.");
+          showError("Invalid data format — 'employees' field not found.");
           return;
         }
 
         rawData = data;
 
+        // Populate runtime metrics for frontend
         rawData.employees.forEach(e => {
           const los = computeLoS(e.joinDate);
           e.losLive    = los;
@@ -653,20 +641,22 @@ function loadData() {
         });
 
         document.getElementById("lastUpdated").textContent =
-          "Last updated: " + new Date(data.lastUpdated).toLocaleString("id-ID") +
-          " · " + data.totalRows.toLocaleString("id") + " baris total";
+          "Last updated: " + new Date(data.lastUpdated).toLocaleString("en-US") +
+          " · " + data.totalRows.toLocaleString("en-US") + " rows total";
 
         populateFilters(data.employees);
         applyFilters();
       } catch (err) {
-        showError("Data diterima tapi gagal diproses.<br><br><small>" + err.message + "</small>");
+        console.error("[Data Processing Error]", err);
+        showError("Data received but failed to process.<br><br><small>" + err.message + "</small>");
       } finally {
         btn.disabled = false;
         btn.textContent = "↻ Refresh Data";
       }
     })
     .withFailureHandler(function(err) {
-      showError("Gagal memanggil Apps Script.<br><br><small>" +
+      console.error("[Data Fetch Failure] Connection to backend failed.", err);
+      showError("Failed to call Apps Script.<br><br><small>" +
         (err && err.message ? err.message : String(err)) + "</small>");
       btn.disabled = false;
       btn.textContent = "↻ Refresh Data";
@@ -674,7 +664,9 @@ function loadData() {
     .getData();
 }
 
+// [EXPLANATION] Dynamically populate dropdown filters based on fetched data
 function populateFilters(employees) {
+  console.log("[Filters] Populating dropdown menus");
   const clean = employees.filter(e => !isDummy(e));
   const uniq  = key => [...new Set(clean.map(e => e[key]).filter(Boolean))].sort();
   fillSelect("filterCompany",  uniq("company"));
@@ -686,6 +678,7 @@ function populateFilters(employees) {
   fillSelect("selYear", years.map(String));
 }
 
+// Event Listeners for cascading dropdowns (Dept -> SubDept -> Position)
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('filterDept').addEventListener('change', function() {
     if (!rawData) return;
@@ -714,8 +707,10 @@ function fillSelect(id, options) {
   if (cur) sel.value = cur;
 }
 
+// [EXPLANATION] Core filtering engine. This filters the raw dataset against all active dropdowns.
 function applyFilters() {
   if (!rawData) return;
+  console.log("[Filters] Applying active filters...");
   const company  = document.getElementById("filterCompany").value;
   const entity   = document.getElementById("filterEntity").value;
   const dept     = document.getElementById("filterDept").value;
@@ -745,29 +740,27 @@ function applyFilters() {
   if (subDept)  parts.push(subDept);
   if (position) parts.push(position);
   document.getElementById('filterSummary').textContent =
-    parts.length ? 'Filter aktif: ' + parts.join(' · ') : '';
+    parts.length ? 'Active filters: ' + parts.join(' · ') : '';
 
+  console.log(`[Filters] Total rows matching filters: ${filtered.length}`);
   renderDashboard();
   if (currentTab === 'explorer'  && rawData) runExplorer();
   if (currentTab === 'attrition' && rawData) renderAttrition();
 }
 
-// ════════════════════════════════════════════════════════════
-// KPI CLICK
-// ════════════════════════════════════════════════════════════
+// UI Interaction triggers
 function kpiClick(n) {
   const d = _kpiData; if (!d.active) return;
-  if (n===1) openModal('Total Karyawan',       d.kpiSub1,                          d.filtered, '');
-  if (n===2) openModal('Karyawan Aktif',        d.active.length+' karyawan aktif',  d.active,   '');
-  if (n===3) openModal('Distribusi Usia',       'Diurutkan dari tertua',            d.active,   'age');
-  if (n===4) openModal('Distribusi LoS',        'Diurutkan dari terlama',           d.active,   'los');
-  if (n===5) openModal('Sub-Department Aktif',  d.uniqueSubDepts+' sub-dept unik',   d.active,   '');
+  if (n===1) openModal('Total Employees',      d.kpiSub1,                            d.filtered, '');
+  if (n===2) openModal('Active Employees',     d.active.length+' active employees',  d.active,   '');
+  if (n===3) openModal('Age Distribution',     'Sorted by oldest',                   d.active,   'age');
+  if (n===4) openModal('LoS Distribution',     'Sorted by longest service',          d.active,   'los');
+  if (n===5) openModal('Active Sub-Depts',     d.uniqueSubDepts+' unique sub-depts', d.active,   '');
 }
 
-// ════════════════════════════════════════════════════════════
-// OVERVIEW RENDER
-// ════════════════════════════════════════════════════════════
+// [EXPLANATION] Renders main overview charts by destroying old chart instances and building new ones
 function renderDashboard() {
+  console.log("[Render] Drawing Dashboard charts...");
   Object.values(chartInst).forEach(c => c.destroy()); chartInst = {};
   const statusF  = document.getElementById("filterStatus").value;
   const active   = filtered.filter(e =>  e.isActive);
@@ -780,30 +773,30 @@ function renderDashboard() {
     return Object.fromEntries(Object.entries(r).sort((a,b) => b[1]-a[1]));
   };
   let kpiSub1, kpiSub2;
-  if (statusF === "active")        { kpiSub1 = "Karyawan Aktif";  kpiSub2 = "Semua aktif"; }
-  else if (statusF === "resigned") { kpiSub1 = "Karyawan Resign"; kpiSub2 = "Semua resign"; }
-  else { kpiSub1 = "Aktif + Resign"; kpiSub2 = pct(active.length,filtered.length)+"% aktif dari total"; }
+  if (statusF === "active")        { kpiSub1 = "Active Employees";  kpiSub2 = "All active"; }
+  else if (statusF === "resigned") { kpiSub1 = "Resigned Employees"; kpiSub2 = "All resigned"; }
+  else { kpiSub1 = "Active + Resigned"; kpiSub2 = pct(active.length,filtered.length)+"% active of total"; }
   const uniqueSubDepts = new Set(active.map(e => (e.subDept||"Unknown").trim())).size;
   _kpiData = { filtered, active, resigned, kpiSub1, kpiSub2, uniqueSubDepts };
 
-  document.getElementById("kv1").textContent = filtered.length.toLocaleString("id");
+  document.getElementById("kv1").textContent = filtered.length.toLocaleString("en-US");
   document.getElementById("ks1").textContent = kpiSub1;
-  document.getElementById("kv2").textContent = active.length.toLocaleString("id");
+  document.getElementById("kv2").textContent = active.length.toLocaleString("en-US");
   document.getElementById("ks2").textContent = kpiSub2;
   document.getElementById("kv3").textContent = avgAge.toFixed(1);
   document.getElementById("kv4").textContent = avgLoS.toFixed(1);
   document.getElementById("kv5").textContent = uniqueSubDepts;
-  document.getElementById("ks5").textContent = "sub-dept ("+active.length+" aktif)";
+  document.getElementById("ks5").textContent = "sub-depts ("+active.length+" active)";
 
   const html = `
     <div class="chart-grid row-3 mb">
       <div class="chart-card"><div class="chart-title"><span class="dot"></span>Gender</div><div class="chart-wrap h180"><canvas id="cGender"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Status Karyawan (Tipe Kontrak)</div><div class="chart-wrap h180"><canvas id="cContract"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Agama</div><div class="chart-wrap h180"><canvas id="cReligion"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Employee Status (Contract Type)</div><div class="chart-wrap h180"><canvas id="cContract"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Religion</div><div class="chart-wrap h180"><canvas id="cReligion"></canvas></div></div>
     </div>
     <div class="chart-grid row-13 mb">
       <div class="chart-card"><div class="chart-title"><span class="dot"></span>Age Group</div><div class="chart-wrap h220"><canvas id="cAge"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Top Department</div><ul class="top-list" id="deptList"></ul></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Top Departments</div><ul class="top-list" id="deptList"></ul></div>
     </div>
     <div class="chart-grid row-2 mb">
       <div class="chart-card"><div class="chart-title"><span class="dot"></span>Job Level</div><div class="chart-wrap h300"><canvas id="cJobLevel"></canvas></div></div>
@@ -811,11 +804,11 @@ function renderDashboard() {
     </div>
     <div class="chart-grid row-2 mb">
       <div class="chart-card"><div class="chart-title"><span class="dot"></span>Sub-Department (Top 15)</div><div class="chart-wrap h340"><canvas id="cSubDept"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Status Pernikahan</div><div class="chart-wrap h340"><canvas id="cMarital"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Marital Status</div><div class="chart-wrap h340"><canvas id="cMarital"></canvas></div></div>
     </div>
     <div class="chart-grid row-2 mb">
       <div class="chart-card"><div class="chart-title"><span class="dot"></span>Legal Entity</div><div class="chart-wrap h260"><canvas id="cEntity"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Top Branch</div><ul class="top-list" id="branchList"></ul></div>
+      <div class="chart-card"><div class="chart-title"><span class="dot"></span>Top Branches</div><ul class="top-list" id="branchList"></ul></div>
     </div>
     ${resigned.length > 0 ? `<div class="chart-grid mb"><div class="chart-card"><div class="chart-title"><span class="dot"></span>Resign Reason</div><div class="chart-wrap h260"><canvas id="cResign"></canvas></div></div></div>` : ''}
   `;
@@ -823,12 +816,12 @@ function renderDashboard() {
 
   const gbA = key => gb(active, key);
   const ageOrder = ["< 25","25–30","31–35","36–40","41–45","> 45"];
-  const losOrder = ["< 1 tahun","1–3 tahun","3–5 tahun","5–10 tahun","> 10 tahun"];
+  const losOrder = ["< 1 year","1–3 years","3–5 years","5–10 years","> 10 years"];
 
   mkDoughnut("cGender",   gbA("gender"),         lbl => openModal("Gender: "+lbl,       "", active.filter(e=>(e.gender||"Unknown")===lbl),''));
   mkDoughnut("cContract",gbA("status"),         lbl => openModal("Status: "+lbl,       "", active.filter(e=>(e.status||"Unknown")===lbl),''));
-  mkDoughnut("cReligion",gbA("religion"),       lbl => openModal("Agama: "+lbl,        "", active.filter(e=>(e.religion||"Unknown")===lbl),''));
-  mkDoughnut("cMarital", gbA("maritalStatus"),  lbl => openModal("Status Nikah: "+lbl, "", active.filter(e=>(e.maritalStatus||"Unknown")===lbl),''));
+  mkDoughnut("cReligion",gbA("religion"),       lbl => openModal("Religion: "+lbl,     "", active.filter(e=>(e.religion||"Unknown")===lbl),''));
+  mkDoughnut("cMarital", gbA("maritalStatus"),  lbl => openModal("Marital Status: "+lbl,"", active.filter(e=>(e.maritalStatus||"Unknown")===lbl),''));
   mkDoughnut("cEntity",  gb(filtered,"legalEntity"), lbl => openModal("Legal Entity: "+lbl,"", filtered.filter(e=>(e.legalEntity||"Unknown")===lbl),''));
   mkBar("cAge",      reorder(gbA("ageGroup"), ageOrder), {horizontal:false},     lbl => openModal("Age Group: "+lbl,"",  active.filter(e=>(e.ageGroup||"Unknown")===lbl),'age'));
   mkBar("cLoS",      reorder(gbA("losGroup"), losOrder), {horizontal:false},     lbl => openModal("LoS: "+lbl,"",        active.filter(e=>(e.losGroup||"Unknown")===lbl),'los'));
@@ -841,14 +834,11 @@ function renderDashboard() {
   renderTopList("branchList",gbA("branch"),     10, name => openModal("Branch: "+name,"",active.filter(e=>e.branch===name),''));
 }
 
-// ════════════════════════════════════════════════════════════
-// DATA EXPLORER
-// ════════════════════════════════════════════════════════════
 const DIM_LABELS = {
   department:"Department",subDept:"Sub-Department",gender:"Gender",
   ageGroup:"Age Group",losGroup:"Length of Service",jobLevel:"Job Level",
-  grade:"Grade",contractType:"Contract Type",religion:"Agama",
-  maritalStatus:"Status Pernikahan",
+  grade:"Grade",contractType:"Contract Type",religion:"Religion",
+  maritalStatus:"Marital Status",
   branch:"Branch",legalEntity:"Legal Entity",company:"Company",
   position:"Position",
 };
@@ -857,14 +847,16 @@ function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;"
 
 let _exPool=[], _exDim1='', _exDim2='', _exDim3='';
 
+// [EXPLANATION] This handles the "Data Explorer" tab where users can create dynamic pivots/breakdowns
 function runExplorer() {
+  console.log("[Data Explorer] Building cross-table view...");
   const dim1 = document.getElementById("exDim1").value;
   const dim2 = document.getElementById("exDim2").value;
   const dim3 = document.getElementById("exDim3").value;
   const pool = filtered.filter(e => e.isActive);
   _exPool=pool; _exDim1=dim1; _exDim2=dim2; _exDim3=dim3;
   if (!pool.length) {
-    document.getElementById("explorerResult").innerHTML='<div class="explorer-empty">Tidak ada data aktif pada filter ini.</div>';
+    document.getElementById("explorerResult").innerHTML='<div class="explorer-empty">No active data found for this filter.</div>';
     document.getElementById("explorerChartArea").style.display='none';
     return;
   }
@@ -901,7 +893,7 @@ function runExplorer() {
       keys2.forEach(k2=>{
         const n2=tree[k1].subs[k2].count,p2=(n2/total*100).toFixed(1),p2of1=(n2/n1*100).toFixed(0);
         rows+=`<tr class="row-lv2" onclick='exOpenModal(${JSON.stringify(dim1)},${JSON.stringify(k1)},${JSON.stringify(dim2)},${JSON.stringify(k2)},"","")'>
-          <td>&nbsp;&nbsp;&nbsp;&#8627; ${esc(k2)}<span style="color:var(--muted);font-size:10px">(${p2of1}% dari ${esc(k1)})</span></td>
+          <td>&nbsp;&nbsp;&nbsp;&#8627; ${esc(k2)}<span style="color:var(--muted);font-size:10px">(${p2of1}% of ${esc(k1)})</span></td>
           <td class="td-count">${n2}</td><td class="td-pct">${p2}%</td>
           <td><span class="explorer-bar" style="width:${Math.max(30,n2/max2*100).toFixed(0)}px"><span class="explorer-bar-fill" style="width:100%"></span></span></td>
         </tr>`;
@@ -910,7 +902,7 @@ function runExplorer() {
           keys3.forEach(k3=>{
             const n3=tree[k1].subs[k2].subs[k3].count,p3=(n3/total*100).toFixed(1),p3of2=(n3/n2*100).toFixed(0);
             rows+=`<tr class="row-lv3" onclick='exOpenModal(${JSON.stringify(dim1)},${JSON.stringify(k1)},${JSON.stringify(dim2)},${JSON.stringify(k2)},${JSON.stringify(dim3)},${JSON.stringify(k3)})'>
-              <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; ${esc(k3)}<span style="color:var(--muted);font-size:10px">(${p3of2}% dari ${esc(k2)})</span></td>
+              <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8627; ${esc(k3)}<span style="color:var(--muted);font-size:10px">(${p3of2}% of ${esc(k2)})</span></td>
               <td class="td-count">${n3}</td><td class="td-pct">${p3}%</td><td></td>
             </tr>`;
           });
@@ -921,14 +913,14 @@ function runExplorer() {
   const dimTitle=[DIM_LABELS[dim1],dim2&&DIM_LABELS[dim2],dim3&&DIM_LABELS[dim3]].filter(Boolean).join(' › ');
   document.getElementById("explorerResult").innerHTML=`
     <div class="explorer-result-header">
-      <span>📊 ${esc(dimTitle)} &mdash; ${total.toLocaleString("id")} karyawan aktif</span>
-      <span style="font-size:11px;font-weight:400;color:var(--muted)">${keys1.length} grup utama &middot; Klik baris untuk detail</span>
+      <span>📊 ${esc(dimTitle)} &mdash; ${total.toLocaleString("en-US")} active employees</span>
+      <span style="font-size:11px;font-weight:400;color:var(--muted)">${keys1.length} main groups &middot; Click row for details</span>
     </div>
     <div class="explorer-table-wrap">
       <table class="explorer-table">
         <thead><tr>
           <th>${esc(DIM_LABELS[dim1]||dim1)}${dim2?' + '+esc(DIM_LABELS[dim2]||dim2):''}${dim3?' + '+esc(DIM_LABELS[dim3]||dim3):''}</th>
-          <th style="text-align:right">Jumlah</th><th style="text-align:right">% Total</th><th>Proporsi</th>
+          <th style="text-align:right">Count</th><th style="text-align:right">% Total</th><th>Proportion</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -947,8 +939,9 @@ function renderExplorerChart(dim1,dim2,dim3,tree,keys1,total){
   const displayKeys=keys1.slice(0,20);
   const isHorizontal=displayKeys.length>8;
   wrapEl.style.height=Math.max(300,isHorizontal?displayKeys.length*28:320)+'px';
+  
   if(!dim2){
-    titleEl.textContent='Distribusi '+(DIM_LABELS[dim1]||dim1);
+    titleEl.textContent='Distribution of '+(DIM_LABELS[dim1]||dim1);
     const values=displayKeys.map(k=>tree[k].count);
     chartInst['exChart']=new Chart(document.getElementById('exChart'),{
       type:'bar',
@@ -958,7 +951,7 @@ function renderExplorerChart(dim1,dim2,dim3,tree,keys1,total){
         plugins:{
           legend:{display:false},
           datalabels:{anchor:isHorizontal?'end':'end',align:isHorizontal?'right':'top',color:'#2C3E2D',font:{size:10,weight:'600'},formatter:v=>`${v} (${((v/total)*100).toFixed(0)}%)`},
-          tooltip:{callbacks:{label:c=>{const v=c.parsed[isHorizontal?'x':'y'];return ` ${v.toLocaleString('id')} (${((v/total)*100).toFixed(1)}%)`;}}},
+          tooltip:{callbacks:{label:c=>{const v=c.parsed[isHorizontal?'x':'y'];return ` ${v.toLocaleString('en-US')} (${((v/total)*100).toFixed(1)}%)`;}}},
         },
         layout:{padding:{right:isHorizontal?70:0,top:isHorizontal?0:24}},
         scales:{x:{grid:{color:"#dde8d8"},ticks:{font:{size:10}}},y:{grid:{color:"#dde8d8"},ticks:{font:{size:10}}}},
@@ -968,7 +961,7 @@ function renderExplorerChart(dim1,dim2,dim3,tree,keys1,total){
   } else {
     const allDim2=[...new Set(displayKeys.flatMap(k1=>Object.keys(tree[k1].subs)))].sort();
     typeRow.innerHTML=`
-      <span style="font-size:11px;color:var(--muted);margin-right:4px;line-height:26px">Tampilan:</span>
+      <span style="font-size:11px;color:var(--muted);margin-right:4px;line-height:26px">Display:</span>
       <button class="period-mode-btn ex-mode-btn active" data-mode="stacked"  onclick="buildExChart('stacked')">Stacked</button>
       <button class="period-mode-btn ex-mode-btn"        data-mode="grouped"  onclick="buildExChart('grouped')">Grouped</button>
       <button class="period-mode-btn ex-mode-btn"        data-mode="percent"  onclick="buildExChart('percent')">100%</button>
@@ -996,7 +989,7 @@ function renderExplorerChart(dim1,dim2,dim3,tree,keys1,total){
           plugins:{
             legend:{position:'top',labels:{boxWidth:10,padding:10,font:{size:11}}},
             datalabels:{display:false},
-            tooltip:{mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed[isH?'x':'y'];return ` ${c.dataset.label}: ${isP?v+'%':v.toLocaleString('id')}`;  }}}
+            tooltip:{mode:'index',intersect:false,callbacks:{label:c=>{const v=c.parsed[isH?'x':'y'];return ` ${c.dataset.label}: ${isP?v+'%':v.toLocaleString('en-US')}`;  }}}
           },
           scales:{
             x:{stacked:!isG,grid:{color:"#dde8d8"},ticks:{font:{size:10}},max:isP?100:undefined},
@@ -1015,12 +1008,10 @@ function exOpenModal(d1,k1,d2,k2,d3,k3){
   let title=(DIM_LABELS[d1]||d1)+': '+k1;
   if(d2&&d2!=='null'&&k2&&k2!=='null'){emps=emps.filter(e=>gv(e,d2)===k2);title+=' › '+k2;}
   if(d3&&d3!=='null'&&k3&&k3!=='null'){emps=emps.filter(e=>gv(e,d3)===k3);title+=' › '+k3;}
-  openModal(title,emps.length+' karyawan aktif',emps,'');
+  openModal(title,emps.length+' active employees',emps,'');
 }
 
-// ════════════════════════════════════════════════════════════
-// CHART BUILDERS
-// ════════════════════════════════════════════════════════════
+// Chart.js helper functions
 function mkDoughnut(id,dataObj,onClickFn){
   const labels=Object.keys(dataObj),values=Object.values(dataObj);
   const total=values.reduce((a,b)=>a+b,0);
@@ -1032,7 +1023,7 @@ function mkDoughnut(id,dataObj,onClickFn){
       responsive:true,maintainAspectRatio:true,cutout:"55%",
       plugins:{
         legend:{position:"bottom",labels:{boxWidth:10,padding:9,font:{size:11}}},
-        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed.toLocaleString("id")} (${((c.parsed/total)*100).toFixed(1)}%)`}},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed.toLocaleString("en-US")} (${((c.parsed/total)*100).toFixed(1)}%)`}},
         datalabels:{display:ctx=>ctx.dataset.data[ctx.dataIndex]/total>0.04,color:'#fff',font:{size:11,weight:'700'},formatter:val=>`${((val/total)*100).toFixed(0)}%`}
       },
       onClick:(evt,els)=>{if(els.length&&onClickFn) onClickFn(labels[els[0].index]);}
@@ -1054,7 +1045,7 @@ function mkBar(id,dataObj,opts={},onClickFn){
       indexAxis:horizontal?"y":"x",responsive:true,maintainAspectRatio:false,
       plugins:{
         legend:{display:false},
-        tooltip:{callbacks:{label:c=>{const v=c.parsed[horizontal?"x":"y"];return ` ${v.toLocaleString("id")} (${((v/total)*100).toFixed(1)}%)`; }}},
+        tooltip:{callbacks:{label:c=>{const v=c.parsed[horizontal?"x":"y"];return ` ${v.toLocaleString("en-US")} (${((v/total)*100).toFixed(1)}%)`; }}},
         datalabels:{anchor:horizontal?'end':'end',align:horizontal?'right':'top',color:'#2C3E2D',font:{size:10,weight:'600'},formatter:val=>val>0?`${val} (${((val/total)*100).toFixed(0)}%)`:''
         ,clip:false}
       },
@@ -1065,33 +1056,42 @@ function mkBar(id,dataObj,opts={},onClickFn){
   });
 }
 
-function renderTopList(id,dataObj,limit=10,onClickFn){
-  const el=document.getElementById(id); if(!el) return;
-  const entries=Object.entries(dataObj).sort((a,b)=>b[1]-a[1]).slice(0,limit);
-  const total=entries.reduce((s,[,c])=>s+c,0);
-  const max=entries[0]?.[1]||1;
-  el.innerHTML=entries.map(([name,count],i)=>`
-    <li onclick="(${onClickFn.toString()})(${JSON.stringify(name)})">
-      <span class="rank">#${i+1}</span>
+function renderTopList(id, dataObj, limit = 10, onClickFn) {
+  const el = document.getElementById(id); 
+  if (!el) return;
+
+  const entries = Object.entries(dataObj).sort((a, b) => b[1] - a[1]).slice(0, limit);
+  const total = entries.reduce((s, [, c]) => s + c, 0);
+  const max = entries[0]?.[1] || 1;
+
+  window['_cb_' + id] = onClickFn;
+
+  el.innerHTML = entries.map(([name, count], i) => {
+    const safeName = String(name).replace(/"/g, '&quot;');
+    return `
+    <li onclick="window['_cb_${id}'](this.getAttribute('data-name'))" data-name="${safeName}">
+      <span class="rank">#${i + 1}</span>
       <div class="bar-wrap">
-        <span class="name" title="${name}">${name}</span>
-        <div class="bar-bg"><div class="bar-fill" style="width:${(count/max*100).toFixed(1)}%"></div></div>
+        <span class="name" title="${safeName}">${safeName}</span>
+        <div class="bar-bg">
+          <div class="bar-fill" style="width:${(count / max * 100).toFixed(1)}%"></div>
+        </div>
       </div>
-      <span class="count">${count.toLocaleString("id")}</span>
-      <span class="tpct">${(count/total*100).toFixed(0)}%</span>
-    </li>`).join("");
+      <span class="count">${count.toLocaleString("en-US")}</span>
+      <span class="tpct">${(count / total * 100).toFixed(0)}%</span>
+    </li>`;
+  }).join("");
 }
 
-// ════════════════════════════════════════════════════════════
-// MODAL
-// ════════════════════════════════════════════════════════════
+// [EXPLANATION] Functions handling the employee details modal popup
 function openModal(title,subtitle,employees,sortBy){
+  console.log(`[Modal] Opening modal: ${title} (${employees.length} rows)`);
   let rows=[...employees];
   if(sortBy==="age") rows.sort((a,b)=>(b.age||0)-(a.age||0));
   if(sortBy==="los") rows.sort((a,b)=>(b.losLive||0)-(a.losLive||0));
   modalRows=rows;
   document.getElementById("modalTitle").textContent=title;
-  document.getElementById("modalSubtitle").textContent=subtitle||rows.length+" karyawan";
+  document.getElementById("modalSubtitle").textContent=subtitle||rows.length+" employees";
   document.getElementById("modalSearch").value="";
   renderModalTable(rows);
   document.getElementById("modalOverlay").classList.add("open");
@@ -1099,11 +1099,11 @@ function openModal(title,subtitle,employees,sortBy){
 }
 
 function renderModalTable(rows){
-  document.getElementById("modalCount").textContent="Menampilkan "+rows.length+" karyawan";
+  document.getElementById("modalCount").textContent="Showing "+rows.length+" employees";
   document.getElementById("modalThead").innerHTML=`
     <tr>
-      <th>Nama</th><th>Department</th><th>Sub-Dept</th><th>Posisi</th>
-      <th>Job Level</th><th>Gender</th><th>Usia</th><th>LoS (thn)</th>
+      <th>Name</th><th>Department</th><th>Sub-Dept</th><th>Position</th>
+      <th>Job Level</th><th>Gender</th><th>Age</th><th>LoS (yrs)</th>
       <th>Join Date</th><th>Resign Date</th><th>Branch</th><th>Status</th>
     </tr>`;
   document.getElementById("modalTbody").innerHTML=rows.map(e=>`
@@ -1119,7 +1119,7 @@ function renderModalTable(rows){
       <td style="white-space:nowrap">${e.joinDate||"-"}</td>
       <td style="white-space:nowrap">${e.resignDate||"-"}</td>
       <td>${e.branch||"-"}</td>
-      <td><span class="badge ${e.isActive?'badge-active':'badge-resign'}">${e.isActive?"Aktif":"Resign"}</span></td>
+      <td><span class="badge ${e.isActive?'badge-active':'badge-resign'}">${e.isActive?"Active":"Resigned"}</span></td>
     </tr>`).join("");
 }
 
@@ -1138,14 +1138,16 @@ function closeModalOutside(evt){if(evt.target===document.getElementById("modalOv
 function closeModalDirect(){document.getElementById("modalOverlay").classList.remove("open");document.body.style.overflow="";}
 document.addEventListener("keydown",e=>{if(e.key==="Escape") closeModalDirect();});
 
+// [EXPLANATION] Export table data directly to a CSV file
 function exportCSV(){
+  console.log("[Export] Downloading CSV");
   const q=document.getElementById("modalSearch").value.toLowerCase();
   const rows=modalRows.filter(e=>!q||(e.name||"").toLowerCase().includes(q)||(e.department||"").toLowerCase().includes(q));
-  const hdr=["Nama","Department","Sub Dept","Posisi","Job Level","Gender","Usia","LoS (thn)","Join Date","Resign Date","Status","Branch","Legal Entity","Agama","Status Pernikahan","Contract Type"];
+  const hdr=["Name","Department","Sub Dept","Position","Job Level","Gender","Age","LoS (yrs)","Join Date","Resign Date","Status","Branch","Legal Entity","Religion","Marital Status","Contract Type"];
   const csv=[hdr,...rows.map(e=>[
     e.name,e.department,e.subDept,e.position,e.jobLevel,
     e.gender,e.age,e.losDisplay||"",e.joinDate,e.resignDate||"",
-    e.isActive?"Aktif":"Resign",e.branch,e.legalEntity,
+    e.isActive?"Active":"Resigned",e.branch,e.legalEntity,
     e.religion,e.maritalStatus,e.contractType
   ])].map(r=>r.map(v=>`"${(v||"").toString().replace(/"/g,'\\"')}"`).join(",")).join("\n");
   const a=document.createElement("a");
@@ -1154,9 +1156,7 @@ function exportCSV(){
   a.click();
 }
 
-// ════════════════════════════════════════════════════════════
-// ATTRITION
-// ════════════════════════════════════════════════════════════
+// [EXPLANATION] Attrition logic specifically handling turnover/retention
 function setAttGran(g){
   attGran=g;
   document.getElementById('attGranYear').classList.toggle('active',g==='year');
@@ -1178,6 +1178,7 @@ function getPeriodKey(dateStr,gran){
 
 function renderAttrition(){
   if(!rawData) return;
+  console.log("[Attrition] Rendering Attrition views");
   Object.keys(chartInst).filter(k=>k.startsWith('att')).forEach(k=>{chartInst[k].destroy();delete chartInst[k];});
   const attFrom=document.getElementById('attFrom').value;
   const attTo  =document.getElementById('attTo').value;
@@ -1246,14 +1247,16 @@ function renderAttrition(){
   const totalJoiners=joiners.length;
   const totalResign =resignedInPeriod.length;
   const activeCount =base.filter(e=>e.isActive).length;
+  
+  // standard turnover formula (Total Resign / Avg HC)
   const avgHC       =Math.max(1,Math.round((activeCount+totalResign)/2));
   const torRate     =(totalResign/avgHC*100).toFixed(1);
   const retRate     =((avgHC-totalResign)/avgHC*100).toFixed(1);
 
-  document.getElementById('attKv1').textContent=totalJoiners.toLocaleString('id');
-  document.getElementById('attKs1').textContent=allPeriods.length+' periode';
-  document.getElementById('attKv2').textContent=totalResign.toLocaleString('id');
-  document.getElementById('attKs2').textContent='dari '+base.length+' total karyawan';
+  document.getElementById('attKv1').textContent=totalJoiners.toLocaleString('en-US');
+  document.getElementById('attKs1').textContent=allPeriods.length+' periods';
+  document.getElementById('attKv2').textContent=totalResign.toLocaleString('en-US');
+  document.getElementById('attKs2').textContent='out of '+base.length+' total employees';
   document.getElementById('attKv3').textContent=torRate+'%';
   document.getElementById('attKv4').textContent=retRate+'%';
 
@@ -1264,22 +1267,22 @@ function renderAttrition(){
     .map(([pos,d])=>({pos,resign:d.resign,total:d.total,tor:d.total>0?(d.resign/d.total*100).toFixed(1):'0.0'}))
     .filter(d=>d.resign>0).sort((a,b)=>parseFloat(b.tor)-parseFloat(a.tor)).slice(0,15);
 
-  const periodLabel=attFrom||attTo?`${attFrom||'…'} s/d ${attTo||'…'}`:'Semua periode';
+  const periodLabel=attFrom||attTo?`${attFrom||'...'} to ${attTo||'...'}`:'All periods';
 
   document.getElementById('attritionContent').innerHTML=`
     <div class="chart-grid row-2 mb">
       <div class="chart-card">
-        <div class="chart-title"><span class="dot"></span>New Joiner per Periode (Join Date)</div>
+        <div class="chart-title"><span class="dot"></span>New Joiners per Period (Join Date)</div>
         <div class="chart-wrap h280"><canvas id="attCJoin"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title"><span class="dot" style="background:var(--accent4)"></span>Resign per Periode (Resign Date)</div>
+        <div class="chart-title"><span class="dot" style="background:var(--accent4)"></span>Resigned per Period (Resign Date)</div>
         <div class="chart-wrap h280"><canvas id="attCResign"></canvas></div>
       </div>
     </div>
     <div class="chart-grid mb">
       <div class="chart-card">
-        <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>Trend Gabungan: New Joiner vs Resign</div>
+        <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>Combined Trend: Joiners vs Resigned</div>
         <div class="chart-wrap h260"><canvas id="attCTrend"></canvas></div>
       </div>
     </div>
@@ -1287,22 +1290,22 @@ function renderAttrition(){
       <div class="chart-card">
         <div class="chart-title">
           <span class="dot" style="background:var(--accent2)"></span>
-          Turn Over Rate per Posisi — Top 15
-          <span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:8px">Periode resign: ${periodLabel}</span>
+          Turn Over Rate by Position — Top 15
+          <span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:8px">Resign period: ${periodLabel}</span>
         </div>
         ${torByPos.length===0
-          ? '<p style="color:var(--muted);font-size:13px;padding:16px 0">Tidak ada data resign pada periode ini.</p>'
+          ? '<p style="color:var(--muted);font-size:13px;padding:16px 0">No resignations found in this period.</p>'
           : `<div style="overflow:auto;max-height:440px">
           <table class="explorer-table" style="font-size:12px">
             <thead><tr>
-              <th>Posisi</th>
-              <th style="text-align:right">Resign (periode)</th>
+              <th>Position</th>
+              <th style="text-align:right">Resigned (period)</th>
               <th style="text-align:right">Total HC</th>
               <th style="text-align:right">TOR %</th>
-              <th style="min-width:120px">Proporsi</th>
+              <th style="min-width:120px">Proportion</th>
             </tr></thead>
-            <tbody>\${torByPos.map(d=>`
-              <tr style="cursor:pointer" onclick="openModal('TOR: ${esc(d.pos)}','${d.resign} resign · TOR ${d.tor}%',_attResignedInPeriod.filter(e=>(e.position||'Unknown').trim()==='${d.pos.replace(/'/g,"\\'")}'),'')">
+            <tbody>${torByPos.map(d=>`
+              <tr style="cursor:pointer" onclick="openModal('TOR: ${esc(d.pos)}','${d.resign} resigned · TOR ${d.tor}%',_attResignedInPeriod.filter(e=>(e.position||'Unknown').trim()==='${d.pos.replace(/'/g,"\\'")}'),'')">
                 <td>${esc(d.pos)}</td>
                 <td class="td-count">${d.resign}</td>
                 <td style="text-align:right;color:var(--muted)">${d.total}</td>
@@ -1348,7 +1351,7 @@ function renderAttrition(){
     stackedOpts(resignDatasets,(evt,els)=>{
       if(!els.length) return;
       const p=allPeriods[els[0].index],co=companies[els[0].datasetIndex];
-      openModal('Resign: '+p+' — '+co,'',resignedInPeriod.filter(e=>getPeriodKey(e.resignDate,attGran)===p&&(e.company||'Unknown')===co),'');
+      openModal('Resigned: '+p+' — '+co,'',resignedInPeriod.filter(e=>getPeriodKey(e.resignDate,attGran)===p&&(e.company||'Unknown')===co),'');
     })
   );
   chartInst['attCTrend']=new Chart(document.getElementById('attCTrend'),{
@@ -1357,7 +1360,7 @@ function renderAttrition(){
       labels:allPeriods,
       datasets:[
         {label:'New Joiner',data:joinerVals,borderColor:'#5BAD3A',backgroundColor:'rgba(91,173,58,0.1)',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:6},
-        {label:'Resign',    data:resignVals, borderColor:'#E05A2B',backgroundColor:'rgba(224,90,43,0.08)',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:6}
+        {label:'Resigned',    data:resignVals, borderColor:'#E05A2B',backgroundColor:'rgba(224,90,43,0.08)',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:6}
       ]
     },
     options:{
@@ -1375,9 +1378,6 @@ function renderAttrition(){
   });
 }
 
-// ════════════════════════════════════════════════════════════
-// UTILS
-// ════════════════════════════════════════════════════════════
 function reorder(obj,order){
   const r={};
   order.forEach(k=>{if(obj[k]!==undefined) r[k]=obj[k];});
@@ -1386,10 +1386,10 @@ function reorder(obj,order){
 }
 function avg(arr){const c=arr.filter(v=>v!=null&&!isNaN(v));return c.length?Math.round(c.reduce((a,b)=>a+b,0)/c.length*10)/10:0;}
 function pct(a,b){return b>0?Math.round(a/b*100):0;}
-function showLoading(){document.getElementById("mainContent").innerHTML='<div class="state-overlay"><div class="spinner"></div><p class="state-msg">Memuat data karyawan…</p></div>';}
+function showLoading(){document.getElementById("mainContent").innerHTML='<div class="state-overlay"><div class="spinner"></div><p class="state-msg">Loading employee data...</p></div>';}
 function showError(msg){document.getElementById("mainContent").innerHTML='<div class="state-overlay"><div class="error-box">❌ '+msg+'</div></div>';}
 
-// Auto-load
+// Init function
 loadData();
 </script>
 </body>
