@@ -2,7 +2,7 @@
 const CONFIG = {
   SHEET_NAME: "emp_database", 
   WEB_APP_TITLE: "Employee Demographic Dashboard",
-  HTML_FILE_NAME: "WebApp_Demographic"
+  HTML_FILE_NAME: "WebApp Demographic"
 };
 
 // [EXPLANATION] This maps spreadsheet column numbers (starting at 0 for Column A) to readable variables
