@@ -1,74 +1,71 @@
-// ============================================================
-// EMPLOYEE DEMOGRAPHIC DASHBOARD - Google Apps Script
-// ============================================================
-
-// CONFIGURATION - Change these values to match your sheet setup
+// CONFIGURATION
 const CONFIG = {
-  SHEET_NAME: "YOUR_SHEET_NAME_HERE", // e.g. "Employee Database"
+  SHEET_NAME: "emp_database", 
   WEB_APP_TITLE: "Employee Demographic Dashboard",
-  HTML_FILE_NAME: "WebApp Demographic"
+  HTML_FILE_NAME: "WebApp_Demographic"
 };
 
-// Column Mapping Index (0-based: A=0, B=1, C=2, etc.)
+// [EXPLANATION] This maps spreadsheet column numbers (starting at 0 for Column A) to readable variables
 const COL = {
-  status:               0,   // A  - Status (Active/Inactive)
-  userId:               1,   // B  - User ID
-  candidateId:          2,   // C  - Candidate ID
-  employeeId:           3,   // D  - Employee ID
-  fullName:             4,   // E  - Full Name
-  organization:         5,   // F  - Organization / Department
-  subDepartment:        6,   // G  - Sub-Department
-  project:              7,   // H  - Project
-  position:             8,   // I  - Position
-  jobLevel:             9,   // J  - Job Level
-  joinDate:             10,  // K  - Join Date
-  resignDate:           11,  // L  - Resign Date
-  statusEmployee:       12,  // M  - Status Employee / Employment Type
-  endDate:              13,  // N  - End Date
-  email:                14,  // O  - Email
-  birthDate:            15,  // P  - Birth Date
-  birthPlace:           16,  // Q  - Birth Place
-  citizenAddress:       17,  // R  - Citizen ID Address
-  residentialAddress:   18,  // S  - Residential Address
-  nik:                  19,  // T  - NIK / ID Number
-  mobilePhone:          20,  // U  - Mobile Phone
-  branchName:           21,  // V  - Branch Name
-  customLocation:       22,  // W  - Location / Worksite
-  religion:             23,  // X  - Religion
-  gender:               24,  // Y  - Gender
-  maritalStatus:        25,  // Z  - Marital Status
-  bloodType:            26,  // AA - Blood Type
-  lengthOfService:      27,  // AB - Length Of Service
-  approvalLine:         28,  // AC - Approval Line
-  managerName:          29,  // AD - Manager Name
-  managerEmail:         30,  // AE - Manager Email
-  grade:                31,  // AF - Grade
-  profilePicture:       32,  // AG - Profile Picture URL
-  customGroup1:         33,  // AH - Custom Field 1
-  customGroup2:         34,  // AI - Custom Field 2
-  legalEntity:          35,  // AJ - Legal Entity
-  company:              36,  // AK - Company
-  resignReason:         37,  // AL - Resignation Reason
-  resignReasonDetail:   38,  // AM - Resignation Reason Detail
+  status:               0,   
+  userId:               1,   
+  candidateId:          2,   
+  employeeId:           3,   
+  fullName:             4,   
+  organization:         5,   
+  subDepartment:        6,   
+  project:              7,   
+  position:             8,   
+  jobLevel:             9,   
+  joinDate:             10,  
+  resignDate:           11,  
+  statusEmployee:       12,  
+  endDate:              13,  
+  email:                14,  
+  birthDate:            15,  
+  birthPlace:           16,  
+  citizenAddress:       17,  
+  residentialAddress:   18,  
+  nik:                  19,  
+  mobilePhone:          20,  
+  branchName:           21,  
+  customLocation:       22,  
+  religion:             23,  
+  gender:               24,  
+  maritalStatus:        25,  
+  bloodType:            26,  
+  lengthOfService:      27,  
+  approvalLine:         28,  
+  managerName:          29,  
+  managerEmail:         30,  
+  grade:                31,  
+  profilePicture:       32,  
+  customGroup1:         33,  
+  customGroup2:         34,  
+  legalEntity:          35,  
+  company:              36,  
+  resignReason:         37,  
+  resignReasonDetail:   38,  
 };
 
-// Filter Keywords
+// [EXPLANATION] Keywords used to determine if an employee is active or inactive based on their status text
 const INACTIVE_STATUS = [
   "resign", "resigned", "inactive", "terminated",
-  "non-active", "nonactive", "tidak aktif", "off", "keluar",
+  "non-active", "nonactive", "off", "left", 
   "dummy", "dummy contract", "dummy probation"
 ];
 
 const ACTIVE_STATUS = [
-  "aktif", "active",
-  "contract", "permanent", "freelance",
+  "active", "contract", "permanent", "freelance",
   "internship", "outsource", "probation",
   "pkwt", "pkwtt"
 ];
 
-// ── doGet: serve HTML dashboard or JSON data ──
+// [EXPLANATION] Entry point for the Google Web App. Renders HTML or spits out JSON if testing via URL params.
 function doGet(e) {
+  Logger.log("doGet initialized.");
   if (e && e.parameter && e.parameter.data === '1') {
+    Logger.log("Returning JSON data due to parameter ?data=1");
     return ContentService
       .createTextOutput(JSON.stringify(getData()))
       .setMimeType(ContentService.MimeType.JSON);
@@ -78,26 +75,33 @@ function doGet(e) {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-// ── getData: Called via google.script.run.getData() ──
+// [EXPLANATION] Main backend data fetcher. Reads the spreadsheet and parses rows.
 function getData() {
+  Logger.log("getData() called. Attempting to fetch spreadsheet.");
   try {
-    const ss    = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = SpreadsheetApp.openById("1k-VsQKOpqRmac3UkA8NKsgni8N7G3M4H8NwViruBL0I");
     const sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
 
     if (!sheet) {
       const available = ss.getSheets().map(s => s.getName()).join(", ");
+      Logger.log(`Error: Sheet ${CONFIG.SHEET_NAME} missing.`);
       return { error: `Sheet "${CONFIG.SHEET_NAME}" not found. Available sheets: ${available}` };
     }
 
     const rows = sheet.getDataRange().getValues();
-    if (rows.length < 2) return { error: "Sheet is empty." };
+    if (rows.length < 2) {
+      Logger.log("Sheet is empty or has only headers.");
+      return { error: "Sheet is empty." };
+    }
 
+    Logger.log(`Fetched ${rows.length} rows.`);
     const headers   = rows[0].map(h => String(h).trim());
     const employees = [];
 
+    // [EXPLANATION] Loop through all rows skipping the header (index 0)
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
-      if (row.every(c => String(c).trim() === "")) continue;
+      if (row.every(c => String(c).trim() === "")) continue; // Skip entirely blank rows
       employees.push(parseRow(row));
     }
 
@@ -105,6 +109,8 @@ function getData() {
     const uniqueContractTypes = [...new Set(employees.map(e => e.contractType))].filter(Boolean).sort();
     const summary             = buildSummary(employees);
 
+    Logger.log(`Processed ${employees.length} valid employees.`);
+    
     return {
       success:     true,
       lastUpdated: new Date().toISOString(),
@@ -150,10 +156,12 @@ function getData() {
       }))
     };
   } catch (err) {
+    Logger.log(`[FATAL ERROR] ${err.message}`);
     return { error: err.message, stack: err.stack };
   }
 }
 
+// [EXPLANATION] Transforms raw spreadsheet array into a clean object with logic applied
 function parseRow(row) {
   const g = col => String(row[col] ?? "").trim();
 
@@ -163,15 +171,16 @@ function parseRow(row) {
   const statusLow      = statusA.toLowerCase();
 
   let isActive;
+  // [EXPLANATION] Logic checks to identify active vs resigned employees
   if (INACTIVE_STATUS.some(v => statusLow.includes(v))) {
     isActive = false;
   } else if (ACTIVE_STATUS.some(v => statusLow.includes(v))) {
     isActive = true;
   } else {
+    // If not matching keywords, default to active if name exists and resign date is empty
     isActive = g(COL.fullName).length > 0 && g(COL.resignDate) === "";
   }
 
-  // Age calculation
   let age = null, ageGroup = "Unknown";
   const bd = parseDate(row[COL.birthDate]);
   if (bd) {
@@ -184,18 +193,17 @@ function parseRow(row) {
              : "> 45";
   }
 
-  // Length of Service (LoS) calculation
   let los = g(COL.lengthOfService), losGroup = "Unknown";
   const jd = parseDate(row[COL.joinDate]);
   const joinDateStr = jd ? jd.toISOString().split("T")[0] : g(COL.joinDate);
   if (jd) {
     const yrs = (Date.now() - jd.getTime()) / (365.25 * 24 * 3600 * 1000);
     if (!los) los = yrs.toFixed(1);
-    losGroup = yrs < 1  ? "< 1 tahun"
-             : yrs < 3  ? "1–3 tahun"
-             : yrs < 5  ? "3–5 tahun"
-             : yrs < 10 ? "5–10 tahun"
-             : "> 10 tahun";
+    losGroup = yrs < 1  ? "< 1 year"
+             : yrs < 3  ? "1–3 years"
+             : yrs < 5  ? "3–5 years"
+             : yrs < 10 ? "5–10 years"
+             : "> 10 years";
   }
 
   const rd = parseDate(row[COL.resignDate]);
@@ -228,25 +236,30 @@ function parseRow(row) {
   };
 }
 
+// [EXPLANATION] Safely attempts to parse various date formats from the spreadsheet
 function parseDate(raw) {
   if (raw == null || raw === "") return null;
   if (raw instanceof Date) return isNaN(raw) ? null : raw;
   if (typeof raw === "number") {
+    // Handling Excel/Google Sheets serial date format
     const d = new Date((raw - 25569) * 86400000);
     return isNaN(d) ? null : d;
   }
   const s = String(raw).trim();
   let d = new Date(s);
   if (!isNaN(d)) return d;
-  const m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})\$/);
+  // Fallback for custom DD/MM/YYYY format parsing
+  const m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
   if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
   return null;
 }
 
+// [EXPLANATION] Groups various gender inputs from source into a strict standard format
 function normalizeGender(raw) {
   const l = raw.toLowerCase();
-  if (l === "f" || /wanita|perempuan|female/.test(l)) return "Perempuan";
-  if (l === "m" || /laki|pria|male/.test(l))          return "Laki-laki";
+  // Catches both English and Indonesian variations inside the spreadsheet dataset
+  if (l === "f" || /wanita|perempuan|female/.test(l)) return "Female";
+  if (l === "m" || /laki|pria|male/.test(l))          return "Male";
   return raw || "Unknown";
 }
 
@@ -254,6 +267,7 @@ function buildSummary(employees) {
   const active   = employees.filter(e => e.isActive);
   const resigned = employees.filter(e => !e.isActive);
 
+  // Group by function helper to tally unique attributes 
   const gb = (arr, key) => {
     const r = {};
     arr.forEach(e => {
